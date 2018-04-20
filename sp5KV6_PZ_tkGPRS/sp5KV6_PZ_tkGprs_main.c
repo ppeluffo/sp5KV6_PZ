@@ -5,7 +5,7 @@
  *      Author: pablo
  */
 
-#include "sp5KV5_tkGprs.h"
+#include "sp5KV6_PZ_tkGprs.h"
 
 //-------------------------------------------------------------------------------------
 void tkGprsTx(void * pvParameters)
@@ -39,10 +39,6 @@ RESTART:
 
 		if ( gprs_configurar() != bool_CONTINUAR ) {	// Intento configurarlo y si no puedo o debo reiniciarlo ( cambio de
 			goto RESTART;				// banda ) salgo con false y vuelvo a APAGAR
-		}
-
-		if ( gprs_monitor_sqe() != bool_CONTINUAR ) {	// Salgo por signal o reset o timeout de control task
-			goto RESTART;
 		}
 
 		if ( gprs_get_ip() != bool_CONTINUAR  ) {	// Si no logro una IP debo reiniciarme. Salgo en este caso

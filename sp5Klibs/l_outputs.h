@@ -12,7 +12,7 @@
 // SPV5 LIB
 // --------------------------------------------------------------------------------
 
-#include <sp5KV5.h>
+#include <sp5KV6_PZ.h>
 
 void OUT_aplicar_consigna_diurna ( void );
 void OUT_aplicar_consigna_nocturna ( void );

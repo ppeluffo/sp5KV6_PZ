@@ -5,7 +5,7 @@
  *      Author: pablo
  */
 
-#include "sp5KV5_tkGprs.h"
+#include <sp5KV6_PZ_tkGPRS/sp5KV6_PZ_tkGprs.h>
 
 static void pv_readImei(void);
 static bool pv_procesar_signals_prender( bool *exit_flag );
@@ -23,7 +23,7 @@ bool exit_flag = bool_RESTART;
 // Entry:
 
 	GPRS_stateVars.state = G_PRENDER;
-	u_uarts_ctl(MODEM_PRENDER);
+	//u_uarts_ctl(0);
 
 	// Debo poner esta flag en true para que el micro no entre en sleep y pueda funcionar el puerto
 	// serial y leer la respuesta del AT del modem.
@@ -154,7 +154,6 @@ bool ret_f = false;
 EXIT:
 
 	GPRS_stateVars.signal_reload = false;
-	GPRS_stateVars.signal_tilt = false;
 	GPRS_stateVars.signal_redial = false;
 	GPRS_stateVars.signal_frameReady = false;
 

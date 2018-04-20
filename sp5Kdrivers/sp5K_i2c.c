@@ -9,7 +9,7 @@
 // SPV5 DRIVER
 // --------------------------------------------------------------------------------
 
-#include <sp5KV5.h>
+#include <sp5KV6_PZ.h>
 #include "sp5K_i2c.h"
 
 static void pvI2C_setBitRate(int bitrateKHz);
@@ -170,8 +170,8 @@ i2c_retry:
 	if ( (i2c_status != TW_START) && (i2c_status != TW_REP_START) ) goto i2c_quit;
 
 	// En el caso del ADC, el read no lleva la parte de mandar la SLA+W. !!!!!
-	//if ( devAddress == ADS7828_ADDR)
-	//	goto SRL_R;
+	if ( devAddress == ADS7828_ADDR)
+		goto SRL_R;
 
 	// Pass2) (SLA_W) Send slave address. Debo recibir 0x18 ( SLA_ACK )
 	txbyte = devAddress | TW_WRITE;

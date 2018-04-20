@@ -5,7 +5,7 @@
  *      Author: pablo
  */
 
-#include "sp5KV5_tkGprs.h"
+#include "sp5KV6_PZ_tkGprs.h"
 
 bool pv_send_init_frame(void);
 bool pv_process_init_response(void);
@@ -14,7 +14,6 @@ static void pv_reconfigure_params(void);
 
 static void pv_process_server_clock(void);
 static uint8_t pv_process_timerPoll(void);
-
 
 //------------------------------------------------------------------------------------
 bool gprs_init_frame(void)
@@ -212,6 +211,8 @@ uint8_t i;
 	// BODY ( 2a parte) :
 	memset(gprs_printfBuff, '\0', sizeof(gprs_printfBuff));
 	pos = 0;
+
+	// Configuracion de canales analogicos
 
 	// Reset status
 	pos += snprintf_P( &gprs_printfBuff[pos],( CHAR256 - pos ),PSTR("&WDG=%d\0"),wdgStatus.resetCause );

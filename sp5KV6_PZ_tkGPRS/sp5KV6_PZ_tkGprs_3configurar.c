@@ -5,7 +5,7 @@
  *      Author: pablo
  */
 
-#include "sp5KV5_tkGprs.h"
+#include "sp5KV6_PZ_tkGprs.h"
 
 static void pv_gprs_configurar_parametros(void);
 static bool pv_gprs_configurar_banda(void);

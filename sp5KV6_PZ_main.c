@@ -111,7 +111,7 @@
  * ----------------------------------------------------------------------------------------------------------------
  */
 
-#include <sp5KV5.h>
+#include <sp5KV6_PZ.h>
 
 static void pv_initMPU(void);
 
@@ -189,18 +189,8 @@ static void pv_initMPU(void)
 	// Son acciones que se hacen antes de arrancar el RTOS
 
 	// Configuro el modo de Sleep.
-	set_sleep_mode(SLEEP_MODE_PWR_SAVE);
+	//set_sleep_mode(SLEEP_MODE_PWR_SAVE);
 }
-/*------------------------------------------------------------------------------------*/
-/*
-void vApplicationIdleHook( void )
-{
-
-	for(;;) {
-
-	}
-}
-*/
 /*------------------------------------------------------------------------------------*/
 void vApplicationTickHook( void )
 {

@@ -5,7 +5,7 @@
  *      Author: pablo
  */
 
-#include "sp5KV5_tkGprs.h"
+#include "sp5KV6_PZ_tkGprs.h"
 
 
 static int32_t waiting_time;
@@ -26,7 +26,7 @@ bool exit_flag = false;
 // Entry:
 
 	GPRS_stateVars.state = G_ESPERA_APAGADO;
-	u_uarts_ctl(MODEM_APAGAR);
+	//u_uarts_ctl(0);
 
 	// Secuencia para apagar el modem y dejarlo en modo low power.
 	if ( (systemVars.debugLevel & (D_BASIC + D_GPRS) ) != 0) {
@@ -99,27 +99,7 @@ static void pv_calcular_tiempo_espera(void)
 		return;
 	}
 
-	// Calculo el tiempo que voy a tener que estar esperando
-	// NORMAL:
-	switch ( systemVars.wrkMode ) {
-	case WK_NORMAL:
-		waiting_time = 30;
-		break;
-
-	case WK_MONITOR_SQE:
-		// Debo prender cuanto antes ( 10s ) para ir a monitorear el sqe
-		waiting_time = 10;
-		break;
-
-	default:
-		waiting_time = 15;
-		break;
-	}
-
-	if ( (systemVars.debugLevel & (D_BASIC + D_GPRS) ) != 0) {
-		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::wait: %lu s\r\n\0"), u_now(), waiting_time );
-		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
-	}
+	waiting_time = 30;
 
 }
 //------------------------------------------------------------------------------------

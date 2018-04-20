@@ -6,7 +6,7 @@
  *
  */
 
-#include <sp5KV5.h>
+#include <sp5KV6_PZ.h>
 #include "FRTOS-IO.h"
 
 void pv_enqueue( UART_device_control_t *pUart, char *pC );

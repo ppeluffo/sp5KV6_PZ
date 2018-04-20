@@ -6,7 +6,7 @@
  */
 
 
-#include "sp5KV5_tkGprs.h"
+#include "sp5KV6_PZ_tkGprs.h"
 
 static bool pv_hay_datos_para_trasmitir(void);
 static bool pv_trasmitir_paquete_de_datos(void );
@@ -71,6 +71,8 @@ bool exit_flag = false;
 		} else {
 
 			// No hay datos para trasmitir
+			// Modo discreto, Salgo a apagarme y esperar
+
 			// modo continuo: espero 90s antes de revisar si hay mas datos para trasmitir
 			sleep_time = 90;
 			while( sleep_time-- > 0 ) {
@@ -84,6 +86,7 @@ bool exit_flag = false;
 				vTaskDelay( (portTickType)( 1000 / portTICK_RATE_MS ) );
 
 			} // while
+
 
 		} // else
 
@@ -107,13 +110,6 @@ bool ret_f = false;
 		goto EXIT;
 	}
 
-	if ( GPRS_stateVars.signal_tilt) {
-		// Salgo a discar inmediatamente.
-		*exit_flag = bool_RESTART;
-		ret_f = true;
-		goto EXIT;
-	}
-
 	if ( GPRS_stateVars.signal_redial) {
 		// Salgo a discar inmediatamente.
 		*exit_flag = bool_RESTART;
@@ -129,7 +125,6 @@ bool ret_f = false;
 EXIT:
 
 	GPRS_stateVars.signal_reload = false;
-	GPRS_stateVars.signal_tilt = false;
 	GPRS_stateVars.signal_redial = false;
 	GPRS_stateVars.signal_frameReady = false;
 
@@ -297,7 +292,6 @@ static void pv_trasmitir_dataRecord( void )
 {
 
 uint16_t pos;
-uint8_t channel;
 frameData_t Aframe;
 StatBuffer_t pxFFStatBuffer;
 
@@ -316,6 +310,7 @@ StatBuffer_t pxFFStatBuffer;
 	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR( "%04d%02d%02d,"),Aframe.rtc.year,Aframe.rtc.month,Aframe.rtc.day );
 	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ), PSTR("%02d%02d%02d"),Aframe.rtc.hour,Aframe.rtc.min, Aframe.rtc.sec );
 
+	// Valores analogicos
 	// Bateria
 	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ), PSTR(",bt=%.2f"),Aframe.batt );
 

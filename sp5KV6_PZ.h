@@ -28,10 +28,12 @@
 #include <util/delay.h>
 #include <avr/cpufunc.h>
 
+#include <l_adc7828.h>
 #include <l_file.h>
 #include <l_rtc.h>
 #include <l_iopines.h>
 #include <l_mcp.h>
+#include <l_outputs.h>
 
 #include "sp5Klibs/avrlibdefs.h"
 #include "sp5Klibs/avrlibtypes.h"
@@ -51,10 +53,10 @@
 
 // DEFINICION DEL TIPO DE SISTEMA
 //----------------------------------------------------------------------------
-#define SP5K_REV "5.1.1"
+#define SP5K_REV "0.0.1"
 #define SP5K_DATE "@ 20180420"
 
-#define SP5K_MODELO "sp5KV5_PZ HW:avr1284P R5.0"
+#define SP5K_MODELO "sp5KV%_PZ HW:avr1284P R5.0"
 #define SP5K_VERSION "FW:FRTOS8"
 
 #define CHAR64		64
@@ -79,7 +81,6 @@
 void tkCmd(void * pvParameters);
 void tkControl(void * pvParameters);
 void tkGprsTx(void * pvParameters);
-//void tkGprsInit(void);
 void tkGprsRx(void * pvParameters);
 
 TaskHandle_t xHandle_tkCmd, xHandle_tkControl, xHandle_tkGprs, xHandle_tkGprsRx;
@@ -103,9 +104,7 @@ wdgStatus_t wdgStatus;
 xSemaphoreHandle sem_SYSVars;
 #define MSTOTAKESYSVARSSEMPH ((  TickType_t ) 10 )
 
-typedef enum { WK_NORMAL = 0, WK_MONITOR_SQE  } t_wrkMode;
-typedef enum { D_NONE = 0, D_BASIC = 1, D_DATA = 2, D_GPRS = 4, D_MEM = 8, D_DEBUG = 64 } t_debug;
-typedef enum { MODEM_PRENDER = 0, MODEM_APAGAR, TERM_PRENDER, TERM_APAGAR } t_uart_ctl;
+typedef enum { D_NONE = 0, D_BASIC = 1, D_GPRS = 4, D_DEBUG = 64 } t_debug;
 
 #define DLGID_LENGTH		12
 #define APN_LENGTH			32
@@ -143,9 +142,6 @@ typedef struct {
 
 	uint16_t timerPoll;
 
-	t_wrkMode wrkMode;
-
-	uint8_t logLevel;		// Nivel de info que presentamos en display.
 	uint8_t debugLevel;		// Indica que funciones debugear.
 	uint8_t gsmBand;
 
@@ -164,7 +160,6 @@ uint32_t ticks;
 //------------------------------------------------------------------------------------
 // utils
 void u_uarts_ctl(uint8_t cmd);
-void u_panic( uint8_t panicCode );
 bool u_configTimerPoll(char *s_tPoll);
 void u_kick_Wdg( uint8_t wdgId );
 bool u_saveSystemParams(void);
@@ -173,7 +168,6 @@ void u_loadDefaults(void);
 char *u_now(void);
 void u_debugPrint(uint8_t debugCode, char *msg, uint16_t size);
 void u_reset(void);
-// tkControl
 
 // tkGprs
 bool u_modem_prendido(void);
@@ -187,9 +181,6 @@ uint8_t systemWdg;
 
 #define WDG_CTL			0x01
 #define WDG_CMD			0x02
-#define WDG_DIN			0x04
-#define WDG_OUT			0x08
-#define WDG_AIN			0x10
 //#define WDG_GPRS		0x20
 //#define WDG_GPRSRX	0x40
 

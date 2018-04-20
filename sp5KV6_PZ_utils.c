@@ -5,7 +5,7 @@
  *      Author: pablo
  */
 
-#include <sp5KV5.h>
+#include <sp5KV6_PZ.h>
 
 static uint8_t pv_paramLoad(uint8_t* data, uint8_t* addr, uint16_t sizebytes);
 static uint8_t pv_paramStore(uint8_t* data, uint8_t* addr, uint16_t sizebytes);
@@ -15,54 +15,8 @@ static uint8_t pv_checkSum ( uint8_t *data,uint16_t sizebytes );
 void u_uarts_ctl(uint8_t cmd)
 {
 
-static bool terminal_prendida = false;
-static bool modem_prendido = false;
+	cbi(UARTCTL_PORT, UARTCTL);	// Habilito el LM365
 
-	switch(cmd) {
-
-	case MODEM_PRENDER:
-		// Si tengo el LM365 deshabilitado lo habilito
-		if ( ! modem_prendido ) {
-			cbi(UARTCTL_PORT, UARTCTL);	// Habilito el LM365
-			modem_prendido = true;
-		}
-		break;
-
-	case TERM_PRENDER:
-		if ( ! terminal_prendida ) {
-			cbi(UARTCTL_PORT, UARTCTL);	// Habilito el LM365
-			terminal_prendida = true;
-		}
-		break;
-
-	case MODEM_APAGAR:
-		modem_prendido = false;
-		if ( ! terminal_prendida ) {
-			sbi(UARTCTL_PORT, UARTCTL);	// Deshabilito el LM365
-		}
-		break;
-
-	case TERM_APAGAR:
-		terminal_prendida = false;
-		if ( ! modem_prendido ) {
-			sbi(UARTCTL_PORT, UARTCTL);	// Deshabilito el LM365
-		}
-		break;
-		break;
-	}
-
-}
-//----------------------------------------------------------------------------------------
-void u_panic( uint8_t panicCode )
-{
-char msg[16];
-
-	snprintf_P( msg,sizeof(msg),PSTR("\r\nPANIC(%d)\r\n\0"), panicCode);
-	FreeRTOS_write( &pdUART1,  msg, sizeof( msg) );
-	vTaskDelay( ( TickType_t)( 20 / portTICK_RATE_MS ) );
-	vTaskSuspendAll ();
-	vTaskEndScheduler ();
-	exit (1);
 }
 //----------------------------------------------------------------------------------------
 bool u_configTimerPoll(char *s_tPoll)
@@ -140,7 +94,6 @@ uint8_t i;
 	systemVars.csq = 0;
 	systemVars.dbm = 0;
 	//systemVars.debugLevel = D_BASIC;
-	systemVars.wrkMode = WK_NORMAL;
 
 	// Cuando arranca si la EE no esta inicializada puede dar cualquier cosa.
 	// De este modo controlo el largo de los strings.
@@ -173,8 +126,6 @@ void u_loadDefaults(void)
 	systemVars.csq = 0;
 	systemVars.dbm = 0;
 	systemVars.gsmBand = 8;
-	systemVars.wrkMode = WK_NORMAL;
-
 	strncpy_P(systemVars.apn, PSTR("SPYMOVIL.VPNANTEL\0"),APN_LENGTH);
 	systemVars.roaming = false;
 

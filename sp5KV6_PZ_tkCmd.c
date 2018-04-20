@@ -5,8 +5,8 @@
  *      Author: root
  */
 
-#include <sp5KV5.h>
-#include "sp5KV5_tkGPRS/sp5KV5_tkGprs.h"
+#include <sp5KV6_PZ.h>
+#include "sp5KV6_PZ_tkGPRS/sp5KV6_PZ_tkGprs.h"
 
 static char cmd_printfBuff[CHAR128];
 char *argv[16];
@@ -19,7 +19,6 @@ static void pv_snprintfP_ERR(void);
 static uint8_t pv_makeArgv(void);
 
 bool pv_cmdWrDebugLevel(char *s);
-bool pv_cmdWrkMode(char *s0, char *s1);
 static void pv_readMemory(void);
 
 //----------------------------------------------------------------------------------------
@@ -75,9 +74,7 @@ uint8_t ticks;
 
 		/* run the cmdline execution functions */
 		cmdlineMainLoop();
-
 	}
-
 }
 /*------------------------------------------------------------------------------------*/
 static void cmdClearScreen(void)
@@ -108,13 +105,9 @@ static void cmdHelpFunction(void)
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  rtc YYMMDDhhmm\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR( "  wrkmode [service | monitor {sqe|frame}]\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  timerpoll, dlgid, gsmband\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-
-
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  debuglevel +/-{none,basic,mem,data,gprs,all} \r\n\0"));
+	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  debuglevel +/-{none,basic,mem,gprs,all} \r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  loglevel (none, info, all)\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
@@ -132,13 +125,13 @@ static void cmdHelpFunction(void)
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  mcp {0|1} regAddr\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  rtc, adc {ch}, frame\r\n\0"));
+	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  rtc, frame\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  ee {addr}{lenght}\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  defaults \r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  (SM) memory,gprs\r\n\0"));
+	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  (SM) frame,memory,gprs\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
@@ -175,12 +168,10 @@ static void cmdStatusFunction(void)
 
 RtcTimeType_t rtcDateTime;
 uint16_t pos;
-uint8_t channel;
-frameData_t Cframe;
 StatBuffer_t pxFFStatBuffer;
 
 	memset( &cmd_printfBuff, '\0', sizeof(cmd_printfBuff));
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("\r\nSpymovil %s %s %s %s\r\n\0"), SP5K_MODELO, SP5K_VERSION, SP5K_REV, SP5K_DATE);
+	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("\r\nSpymovil %s %s %s %s\r\n\0"), SP5K_MODELO, SP5K_VERSION,SP5K_REV, SP5K_DATE);
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	// Last reset info
@@ -326,21 +317,6 @@ StatBuffer_t pxFFStatBuffer;
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  memory: wrPtr=%d,rdPtr=%d,delPtr=%d,Free=%d,4del=%d \r\n"), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del );
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
-	/* WRK mode (NORMAL / SERVICE) */
-	pos = snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  wrkmode: "));
-	switch (systemVars.wrkMode) {
-	case WK_NORMAL:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("normal\r\n"));
-		break;
-	case WK_MONITOR_SQE:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("monitor_sqe\r\n"));
-		break;
-	default:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("ERROR\r\n"));
-		break;
-	}
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-
 	/* Timers */
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  timerPoll: [%ds]\r\n\0"),systemVars.timerPoll );
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
@@ -351,10 +327,7 @@ StatBuffer_t pxFFStatBuffer;
 		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("none") );
 	} else {
 		if ( (systemVars.debugLevel & D_BASIC) != 0) { pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("+basic")); }
-		if ( (systemVars.debugLevel & D_DATA) != 0) { pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("+data")); }
 		if ( (systemVars.debugLevel & D_GPRS) != 0) { pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("+gprs")); }
-		if ( (systemVars.debugLevel & D_MEM) != 0)   { pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("+mem")); }
-		if ( (systemVars.debugLevel & D_DEBUG) != 0)  { pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("+debug")); }
 	}
 	snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
@@ -367,8 +340,6 @@ StatBuffer_t pxFFStatBuffer;
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  batt{0-15V}\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
-	/* VALUES --------------------------------------------------------------------------------------- */
-
 }
 /*------------------------------------------------------------------------------------*/
 static void cmdReadFunction(void)
@@ -376,9 +347,7 @@ static void cmdReadFunction(void)
 uint8_t argc;
 char datetime[24];
 bool retS = false;
-uint16_t adcRetValue = 9999;
 uint8_t regValue;
-uint8_t pin;
 
 	argc = pv_makeArgv();
 
@@ -428,11 +397,13 @@ uint8_t pin;
 		return;
 	}
 
- 	// DEFAULT (load default configuration)
+	// DEFAULT (load default configuration)
 	if (!strcmp_P( strupr(argv[1]), PSTR("DEFAULTS\0"))) {
 		u_loadDefaults();
 		return;
 	}
+
+	// FRAME
 
 	// MEMORY
 	if (!strcmp_P( strupr(argv[1]), PSTR("MEMORY\0"))) {
@@ -557,13 +528,6 @@ uint8_t argc;
 		return;
 	}
 
-	/* WRKMODE */
-	if (!strcmp_P( strupr(argv[1]), PSTR("WRKMODE\0"))) {
-		retS = pv_cmdWrkMode(argv[2],argv[3]);
-		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
-		return;
-	}
-
 	// TIMERPOLL
 	if (!strcmp_P( strupr(argv[1]), PSTR("TIMERPOLL\0"))) {
 		retS = u_configTimerPoll(argv[2]);
@@ -597,7 +561,7 @@ uint8_t argc;
 	}
 
 	// EE: write ee pos string
-	if (!strcmp_P( strupr(argv[1]), PSTR("EE\0")) ) {
+	if (!strcmp_P( strupr(argv[1]), PSTR("EE\0"))) {
 		retS = EE_test_write( argv[2], argv[3]);
 		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
 		return;
@@ -664,25 +628,6 @@ uint8_t argc;
 /*------------------------------------------------------------------------------------*/
 // FUNCIONES PRIVADAS
 //-------------------------------------------------------------------------------------
-bool pv_cmdWrkMode(char *s0, char *s1)
-{
-bool retS = false;
-
-	if ((!strcmp_P(strupr(s0), PSTR("MONITOR")))) {
-
-		if ((!strcmp_P( strupr(s1), PSTR("SQE")))) {
-			systemVars.wrkMode = WK_MONITOR_SQE;
-			retS = true;
-			goto quit;
-		}
-
-	}
-
-quit:
-
-	return(retS);
-}
-/*------------------------------------------------------------------------------------*/
 bool pv_cmdWrDebugLevel(char *s)
 {
 
@@ -703,30 +648,6 @@ bool pv_cmdWrDebugLevel(char *s)
 		}
 	}
 
-	if ((!strcmp_P( strupr(s), PSTR("+DATA")))) {
-		systemVars.debugLevel += D_DATA;
-		return(true);
-	}
-
-	if ((!strcmp_P( strupr(s), PSTR("-DATA")))) {
-		if ( ( systemVars.debugLevel & D_DATA) != 0 ) {
-			systemVars.debugLevel -= D_DATA;
-			return(true);
-		}
-	}
-
-	if ((!strcmp_P( strupr(s), PSTR("+MEM")))) {
-		systemVars.debugLevel += D_MEM;
-		return(true);
-	}
-
-	if ((!strcmp_P( strupr(s), PSTR("-MEM")))) {
-		if ( ( systemVars.debugLevel & D_MEM) != 0 ) {
-			systemVars.debugLevel -= D_MEM;
-			return(true);
-		}
-	}
-
 	if ((!strcmp_P( strupr(s), PSTR("+GPRS")))) {
 		systemVars.debugLevel += D_GPRS;
 		return(true);
@@ -739,19 +660,8 @@ bool pv_cmdWrDebugLevel(char *s)
 		}
 	}
 
-	if ((!strcmp_P( strupr(s), PSTR("+DEBUG")))) {
-		systemVars.debugLevel += D_DEBUG;
-		return(true);
-	}
-
-	if ((!strcmp_P( strupr(s), PSTR("-DEBUG")))) {
-		if ( ( systemVars.debugLevel & D_DEBUG) != 0 ) {
-			systemVars.debugLevel -= D_DEBUG;
-			return(true);
-		}
-	}
 	if ((!strcmp_P( strupr(s), PSTR("ALL")))) {
-		systemVars.debugLevel = D_DATA + D_GPRS + D_MEM + D_DEBUG;
+		systemVars.debugLevel = D_GPRS + D_DEBUG;
 		return(true);
 	}
 
@@ -801,8 +711,8 @@ static void pv_readMemory(void)
 StatBuffer_t pxFFStatBuffer;
 frameData_t Aframe;
 size_t bRead;
-uint8_t pos, channel;
 uint16_t rcds = 0;
+uint16_t pos;
 
 	FF_seek();
 	while(1) {

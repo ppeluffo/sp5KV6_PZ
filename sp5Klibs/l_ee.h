@@ -12,7 +12,7 @@
 #ifndef SRC_SP5KLIBS_L_EE_H_
 #define SRC_SP5KLIBS_L_EE_H_
 
-#include <sp5KV5.h>
+#include <sp5KV6_PZ.h>
 #include "FRTOS-IO.h"
 
 //#define ee_DEBUG

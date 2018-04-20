@@ -8,8 +8,8 @@
  *  - Recibe un mensaje del timer del led para indicar si debe prender o apagarlo.
  */
 
-#include "sp5KV5.h"
-#include "sp5KV5_tkGPRS/sp5KV5_tkGprs.h"
+#include <sp5KV6_PZ.h>
+#include "sp5KV6_PZ_tkGPRS/sp5KV6_PZ_tkGprs.h"
 
 static char ctl_printfBuff[CHAR128];
 
@@ -93,19 +93,11 @@ static uint8_t count = 3;
 
    	// Prendo.
    	IO_set_led_KA_logicBoard();				// Led de KA de la placa logica
-   	IO_set_led_KA_analogBoard();			// Idem. analog board
-
-    if ( u_modem_prendido() ) {
-    	IO_set_led_MODEM_analogBoard();
-   	}
-
-   	// no es necesario ya que lo que demora las MCP son suficientes.
+  	// no es necesario ya que lo que demora las MCP son suficientes.
    	//vTaskDelay( 1 );
 
    	// Apago
    	IO_clear_led_KA_logicBoard();
-    IO_clear_led_KA_analogBoard();
-    IO_clear_led_MODEM_analogBoard();
 
  }
 //------------------------------------------------------------------------------------
@@ -142,9 +134,8 @@ uint16_t recSize;
 	vTaskDelay( ( TickType_t)( 500 / portTICK_RATE_MS ) );
 
 	MCP_init(0);				// Esto prende la terminal.
-	MCP_init(1);
 	IO_term_pwr_on();
-	u_uarts_ctl(TERM_PRENDER);
+	u_uarts_ctl(0);
 
 	// Load systemVars
 	if  ( u_loadSystemParams() == true ) {
@@ -184,7 +175,6 @@ uint16_t recSize;
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 
 	pos = snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("Modules:: BASIC\0"));
-	pos += snprintf_P( &ctl_printfBuff[pos],sizeof(ctl_printfBuff),PSTR("+RANGE\0"));
 	pos += snprintf_P( &ctl_printfBuff[pos],sizeof(ctl_printfBuff),PSTR("\r\n"));
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 
@@ -220,6 +210,3 @@ uint8_t pos;
 
 }
 //------------------------------------------------------------------------------------
-// FUNCIONES PUBLICAS DE USO GENERAL
-//------------------------------------------------------------------------------------
-

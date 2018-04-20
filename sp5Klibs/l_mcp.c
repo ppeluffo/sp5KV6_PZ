@@ -13,7 +13,7 @@
 // --------------------------------------------------------------------------------
 
 #include <l_mcp.h>
-#include <sp5KV5.h>
+#include <sp5KV6_PZ.h>
 #include "FRTOS-IO.h"
 
 // Funciones privadas del modulo MCP

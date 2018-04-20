@@ -5,7 +5,7 @@
  *      Author: pablo
  */
 
-#include "sp5KV5_tkGprs.h"
+#include "sp5KV6_PZ_tkGprs.h"
 
 static void pv_read_ip_assigned(void);
 static bool pv_procesar_signals_getip( bool *exit_flag );
@@ -127,7 +127,6 @@ bool ret_f = false;
 EXIT:
 
 	GPRS_stateVars.signal_reload = false;
-	GPRS_stateVars.signal_tilt = false;
 	GPRS_stateVars.signal_redial = false;
 	GPRS_stateVars.signal_frameReady = false;
 

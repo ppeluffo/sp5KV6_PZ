@@ -8,7 +8,7 @@
 #ifndef SP5KV5_TKGPRS_SP5KV5_TKGPRS_H_
 #define SP5KV5_TKGPRS_SP5KV5_TKGPRS_H_
 
-#include "../sp5KV5.h"
+#include "../sp5KV6_PZ.h"
 
 char gprs_printfBuff[CHAR256];
 
@@ -40,7 +40,6 @@ struct {
 	bool modem_prendido;
 	bool signal_reload;
 	bool signal_redial;
-	bool signal_tilt;
 	bool signal_frameReady;
 	uint8_t state;
 
@@ -53,7 +52,6 @@ struct {
 bool gprs_esperar_apagado(void);
 bool gprs_prender(void);
 bool gprs_configurar(void);
-bool gprs_monitor_sqe(void);
 bool gprs_get_ip(void);
 bool gprs_init_frame(void);
 bool gprs_data(void);
