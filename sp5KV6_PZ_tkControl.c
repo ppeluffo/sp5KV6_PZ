@@ -113,7 +113,7 @@ static uint32_t ticks_to_reset = 86400; // Segundos en 1 dia.
 	}
 
 	snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("%s CTL::reset: Daily Reset !!\r\n\0"), u_now() );
-	u_debugPrint( D_BASIC, ctl_printfBuff, sizeof(ctl_printfBuff) );
+	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 	vTaskDelay( ( TickType_t)( 1000 / portTICK_RATE_MS ) );
 	wdt_enable(WDTO_30MS);
 	while(1) {}
@@ -174,7 +174,7 @@ uint16_t recSize;
 	snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("RCD size %d bytes.\r\n\0"),recSize);
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 
-	pos = snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("Modules:: BASIC\0"));
+	pos = snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("Modules:: BASIC+RANGE\0"));
 	pos += snprintf_P( &ctl_printfBuff[pos],sizeof(ctl_printfBuff),PSTR("\r\n"));
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 

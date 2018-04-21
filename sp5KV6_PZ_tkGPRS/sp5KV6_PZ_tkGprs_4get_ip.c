@@ -24,10 +24,8 @@ bool exit_flag = bool_RESTART;
 	GPRS_stateVars.state = G_GET_IP;
 
 	// APN
-	if ( (systemVars.debugLevel & ( D_BASIC + D_GPRS) ) != 0) {
-		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::ip: SET APN\r\n\0"), u_now() );
-		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
-	}
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::ip: SET APN\r\n\0"), u_now() );
+	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	FreeRTOS_ioctl( &pdUART0,ioctl_UART_CLEAR_RX_BUFFER, NULL, false);
 	FreeRTOS_ioctl( &pdUART0,ioctl_UART_CLEAR_TX_BUFFER, NULL, false);
@@ -41,7 +39,7 @@ bool exit_flag = bool_RESTART;
 	// Intento MAX_IP_QUERIES veces que me asignen una IP.
 	for ( ip_queries = 0; ip_queries < MAX_IP_QUERIES; ip_queries++ ) {
 
-		if ( (systemVars.debugLevel & ( D_GPRS) ) != 0) {
+		if ( systemVars.debugLevel == D_GPRS ) {
 			snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::ip: ask IP(%d):\r\n\0"), u_now(),ip_queries);
 			FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 		}
@@ -70,10 +68,8 @@ bool exit_flag = bool_RESTART;
 			if ( strstr( gprsRx.buffer, "E2IPA: 000") != NULL ) {
 				g_printRxBuffer();
 				exit_flag = bool_CONTINUAR;
-				if ( (systemVars.debugLevel & ( D_BASIC + D_GPRS ) ) != 0) {
-					snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::ip: IP OK.\r\n\0"), u_now() );
-					FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
-				}
+				snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::ip: IP OK.\r\n\0"), u_now() );
+				FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 				pv_read_ip_assigned();	// Leo e informo cual IP me asigno la red
 				goto EXIT;
 			}
@@ -92,10 +88,8 @@ bool exit_flag = bool_RESTART;
 
 	// Aqui es que luego de tantos reintentos no consegui la IP.
 	exit_flag = bool_RESTART;
-	if ( (systemVars.debugLevel & ( D_BASIC + D_GPRS ) ) != 0) {
-		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::ip: FAIL !!.\r\n\0"), u_now() );
-		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
-	}
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::ip: FAIL !!.\r\n\0"), u_now() );
+	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 	goto EXIT;
 
 // Exit
@@ -115,18 +109,8 @@ static bool pv_procesar_signals_getip( bool *exit_flag )
 
 bool ret_f = false;
 
-	if ( GPRS_stateVars.signal_reload) {
-		// Salgo a reiniciar tomando los nuevos parametros.
-		*exit_flag = bool_RESTART;
-		ret_f = true;
-		goto EXIT;
-	}
-
-	ret_f = false;
-
 EXIT:
 
-	GPRS_stateVars.signal_reload = false;
 	GPRS_stateVars.signal_redial = false;
 	GPRS_stateVars.signal_frameReady = false;
 
@@ -163,7 +147,7 @@ char c;
 	}
 	systemVars.dlg_ip_address[i++] = '\0';
 	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::ip: IP=[%s]\r\n\0"), u_now(), systemVars.dlg_ip_address);
-	u_debugPrint( ( D_BASIC + D_GPRS ), gprs_printfBuff, sizeof(gprs_printfBuff) );
+	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 }
 //------------------------------------------------------------------------------------

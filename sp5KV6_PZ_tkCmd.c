@@ -20,6 +20,8 @@ static uint8_t pv_makeArgv(void);
 
 bool pv_cmdWrDebugLevel(char *s);
 static void pv_readMemory(void);
+static void pv_cmd_pulse(void);
+static void pv_cmd_testpin(void);
 
 //----------------------------------------------------------------------------------------
 // FUNCIONES DE CMDMODE
@@ -30,7 +32,9 @@ static void cmdResetFunction(void);
 static void cmdStatusFunction(void);
 static void cmdReadFunction(void);
 static void cmdWriteFunction(void);
-static void cmdRedialFunction(void);
+static void cmdKillFunction(void);
+static void cmdConfigFunction(void);
+
 /*------------------------------------------------------------------------------------*/
 void tkCmd(void * pvParameters)
 {
@@ -51,7 +55,8 @@ uint8_t ticks;
 	cmdlineAddCommand((uint8_t *)("read"), cmdReadFunction);
 	cmdlineAddCommand((uint8_t *)("write"), cmdWriteFunction);
 	cmdlineAddCommand((uint8_t *)("status"), cmdStatusFunction);
-	cmdlineAddCommand((uint8_t *)("redial"), cmdRedialFunction);
+	cmdlineAddCommand((uint8_t *)("kill"), cmdKillFunction);
+	cmdlineAddCommand((uint8_t *)("config"), cmdConfigFunction);
 
 	// Espero la notificacion para arrancar
 	vTaskDelay( ( TickType_t)( 500 / portTICK_RATE_MS ) );
@@ -87,52 +92,95 @@ static void cmdClearScreen(void)
 static void cmdHelpFunction(void)
 {
 
-	memset( &cmd_printfBuff, '\0', sizeof(cmd_printfBuff));
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("\r\nSpymovil %s %s %s %s\r\n\0"), SP5K_MODELO, SP5K_VERSION, SP5K_REV, SP5K_DATE);
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+	pv_makeArgv();
 
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("Available commands are:\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-cls\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-reset {memory}\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-status\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-redial\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-write\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  rtc YYMMDDhhmm\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  timerpoll, dlgid, gsmband\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  debuglevel +/-{none,basic,mem,gprs,all} \r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  loglevel (none, info, all)\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  apn, roaming {on|off}, port, ip, script, passwd\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  save\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  (SM) mcp {devId}{regAddr}{regValue}\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  (SM) ee addr string\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  (SM) led {0|1},gprspwr {0|1},gprssw {0|1}\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-read\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  mcp {0|1} regAddr\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  rtc, frame\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  ee {addr}{lenght}\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  defaults \r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  (SM) frame,memory,gprs\r\n\0"));
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+	// HELP WRITE
+	if (!strcmp_P( strupr(argv[1]), PSTR("WRITE\0"))) {
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-write\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  mcp {devId}{regAddr}{regValue}\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  ee addr string\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  led {0|1},gprspwr {0|1},gprssw {0|1}\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  redial\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  pulse {on|off}\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+	}
+
+	// HELP READ
+	else if (!strcmp_P( strupr(argv[1]), PSTR("READ\0"))) {
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-read\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  mcp {0|1} regAddr\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  rtc, frame\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  ee {addr}{lenght}\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  memory,gprs\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+	}
+
+	// HELP RESET
+	else if (!strcmp_P( strupr(argv[1]), PSTR("RESET\0"))) {
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-reset\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  memory\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+	}
+
+	// HELP CONFIG
+	else if (!strcmp_P( strupr(argv[1]), PSTR("CONFIG\0"))) {
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-config\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  rtc YYMMDDhhmm\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  timerpoll, dlgid, gsmband\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  debuglevel {none,gprs,range } \r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  apn, roaming {on|off}, port, ip, script, passwd\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  defaults \r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  save\r\n\0"));
+	}
+
+	// HELP KILL
+	else if (!strcmp_P( strupr(argv[1]), PSTR("KILL\0"))) {
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-kill \r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  {gprstx,gprsrx,range}\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+
+	} else {
+
+		// HELP GENERAL
+		memset( &cmd_printfBuff, '\0', sizeof(cmd_printfBuff));
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("\r\nSpymovil %s %s %s %s\r\n\0"), SP5K_MODELO, SP5K_VERSION, SP5K_REV, SP5K_DATE);
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("Available commands are:\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-cls\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-status\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-reset...\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-config...\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-read...\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-write...\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-kill...\r\n\0"));
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+	}
+
 	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
@@ -153,14 +201,33 @@ static void cmdResetFunction(void)
 
 }
 /*------------------------------------------------------------------------------------*/
-static void cmdRedialFunction(void)
+static void cmdKillFunction(void)
 {
-	// Envio un mensaje a la tk_Gprs para que recargue la configuracion y disque al server
-	// Notifico en modo persistente. Si no puedo me voy a resetear por watchdog. !!!!
-	while ( xTaskNotify(xHandle_tkGprsRx,TK_REDIAL , eSetBits ) != pdPASS ) {
-		vTaskDelay( ( TickType_t)( 100 / portTICK_RATE_MS ) );
+
+	pv_makeArgv();
+
+	// KILL GPRSTX
+	if (!strcmp_P( strupr(argv[1]), PSTR("GPRSTX\0"))) {
+		vTaskSuspend( xHandle_tkGprs );
+		// Dejo la flag de modem prendido para poder leer comandos
+		GPRS_stateVars.modem_prendido = true;
+		return;
 	}
 
+	// KILL GPRSRX
+	if (!strcmp_P( strupr(argv[1]), PSTR("GPRSRX\0"))) {
+		vTaskSuspend( xHandle_tkGprsRx );
+		return;
+	}
+
+	// KILL RANGE
+	if (!strcmp_P( strupr(argv[1]), PSTR("RANGE\0"))) {
+		vTaskSuspend( xHandle_tkRange );
+		return;
+	}
+
+	pv_snprintfP_OK();
+	return;
 }
 /*------------------------------------------------------------------------------------*/
 static void cmdStatusFunction(void)
@@ -325,9 +392,10 @@ StatBuffer_t pxFFStatBuffer;
 	pos = snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  debugLevel: "));
 	if ( systemVars.debugLevel == D_NONE) {
 		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("none") );
-	} else {
-		if ( (systemVars.debugLevel & D_BASIC) != 0) { pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("+basic")); }
-		if ( (systemVars.debugLevel & D_GPRS) != 0) { pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("+gprs")); }
+	} else 	if ( systemVars.debugLevel == D_GPRS) {
+		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("gprs") );
+	} else 	if ( systemVars.debugLevel == D_RANGE) {
+		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("range") );
 	}
 	snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("\r\n\0"));
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
@@ -420,9 +488,116 @@ uint8_t regValue;
 static void cmdWriteFunction(void)
 {
 bool retS = false;
-uint8_t argc;
 
-	argc = pv_makeArgv();
+	pv_makeArgv();
+
+	// PULSE
+	if (!strcmp_P( strupr(argv[1]), PSTR("PULSE\0")) ) {
+		pv_cmd_pulse();
+		return;
+	}
+
+	// TESTPIN
+	if (!strcmp_P( strupr(argv[1]), PSTR("TESTPIN\0")) ) {
+		pv_cmd_testpin();
+		return;
+	}
+
+	// GSMBAND:
+	// Debo estar en modo service ya que para que tome el valor debe resetearse
+	if (!strcmp_P( strupr(argv[1]), PSTR("GSMBAND\0"))) {
+		if ( argv[2] == NULL ) {
+			retS = false;
+		} else {
+			systemVars.gsmBand = atoi(argv[2]);
+			retS = true;
+		}
+		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
+		return;
+	}
+
+	// EE: write ee pos string
+	if (!strcmp_P( strupr(argv[1]), PSTR("EE\0"))) {
+		retS = EE_test_write( argv[2], argv[3]);
+		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
+		return;
+	}
+
+	// gprsPWR
+	if (!strcmp_P( strupr(argv[1]), PSTR("GPRSPWR\0"))) {
+		switch( atoi(argv[2]) ) {
+		case 0:
+			IO_modem_hw_pwr_off();
+			retS = true;
+			break;
+		case 1:
+			IO_modem_hw_pwr_on();
+			retS = true;
+			break;
+		default:
+			retS = false;
+			break;
+		}
+		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
+		return;
+	}
+
+	// gprsSW
+	if (!strcmp_P( strupr(argv[1]), PSTR("GPRSSW\0"))) {
+		switch( atoi(argv[2]) ) {
+		case 0:
+			IO_modem_sw_switch_low();
+			retS = true;
+			break;
+		case 1:
+			IO_modem_sw_switch_high();
+			retS = true;
+			break;
+		default:
+			retS = false;
+			break;
+		}
+		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
+		return;
+	}
+
+	// MCP
+	// write mcp 0|1|2 addr value
+	if (!strcmp_P( strupr(argv[1]), PSTR("MCP\0"))) {
+		switch( atoi(argv[2] )) {
+		case 0:
+			retS = MCP_write( MCP0_ADDR, atoi(argv[3]), atoi(argv[4]) );
+			break;
+		case 1:
+			retS = MCP_write( MCP1_ADDR, atoi(argv[3]), atoi(argv[4]) );
+			break;
+		}
+		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
+		return;
+	}
+
+	// REDIAL
+	// Envio un mensaje a la tk_Gprs para que recargue la configuracion y disque al server
+	// Notifico en modo persistente. Si no puedo me voy a resetear por watchdog. !!!!
+	if (!strcmp_P( strupr(argv[1]), PSTR("REDIAL\0"))) {
+
+		while ( xTaskNotify(xHandle_tkGprsRx,TK_REDIAL , eSetBits ) != pdPASS ) {
+			vTaskDelay( ( TickType_t)( 100 / portTICK_RATE_MS ) );
+		}
+
+	}
+
+	// CMD NOT FOUND
+	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("ERROR\r\nCMD NOT DEFINED\r\n"));
+	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+	return;
+}
+/*------------------------------------------------------------------------------------*/
+static void cmdConfigFunction(void)
+{
+bool retS = false;
+
+	pv_makeArgv();
 
 	if (!strcmp_P( strupr(argv[1]), PSTR("SAVE\0"))) {
 		retS = u_saveSystemParams();
@@ -542,11 +717,6 @@ uint8_t argc;
 		return;
 	}
 
-	//----------------------------------------------------------------------
-	// COMANDOS USADOS PARA DIAGNOSTICO
-	// DEBEMOS ESTAR EN MODO SERVICE
-	//----------------------------------------------------------------------
-
 	// GSMBAND:
 	// Debo estar en modo service ya que para que tome el valor debe resetearse
 	if (!strcmp_P( strupr(argv[1]), PSTR("GSMBAND\0"))) {
@@ -555,66 +725,6 @@ uint8_t argc;
 		} else {
 			systemVars.gsmBand = atoi(argv[2]);
 			retS = true;
-		}
-		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
-		return;
-	}
-
-	// EE: write ee pos string
-	if (!strcmp_P( strupr(argv[1]), PSTR("EE\0"))) {
-		retS = EE_test_write( argv[2], argv[3]);
-		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
-		return;
-	}
-
-	// gprsPWR
-	if (!strcmp_P( strupr(argv[1]), PSTR("GPRSPWR\0"))) {
-		switch( atoi(argv[2]) ) {
-		case 0:
-			IO_modem_hw_pwr_off();
-			retS = true;
-			break;
-		case 1:
-			IO_modem_hw_pwr_on();
-			retS = true;
-			break;
-		default:
-			retS = false;
-			break;
-		}
-		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
-		return;
-	}
-
-	// gprsSW
-	if (!strcmp_P( strupr(argv[1]), PSTR("GPRSSW\0"))) {
-		switch( atoi(argv[2]) ) {
-		case 0:
-			IO_modem_sw_switch_low();
-			retS = true;
-			break;
-		case 1:
-			IO_modem_sw_switch_high();
-			retS = true;
-			break;
-		default:
-			retS = false;
-			break;
-		}
-		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
-		return;
-	}
-
-	// MCP
-	// write mcp 0|1|2 addr value
-	if (!strcmp_P( strupr(argv[1]), PSTR("MCP\0"))) {
-		switch( atoi(argv[2] )) {
-		case 0:
-			retS = MCP_write( MCP0_ADDR, atoi(argv[3]), atoi(argv[4]) );
-			break;
-		case 1:
-			retS = MCP_write( MCP1_ADDR, atoi(argv[3]), atoi(argv[4]) );
-			break;
 		}
 		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
 		return;
@@ -636,38 +746,20 @@ bool pv_cmdWrDebugLevel(char *s)
 		return(true);
 	}
 
-	if ((!strcmp_P( strupr(s), PSTR("+BASIC")))) {
-		systemVars.debugLevel += D_BASIC;
+	if ((!strcmp_P( strupr(s), PSTR("GPRS")))) {
+		systemVars.debugLevel = D_GPRS;
 		return(true);
 	}
 
-	if ((!strcmp_P( strupr(s), PSTR("-BASIC")))) {
-		if ( ( systemVars.debugLevel & D_BASIC) != 0 ) {
-			systemVars.debugLevel -= D_BASIC;
-			return(true);
-		}
-	}
-
-	if ((!strcmp_P( strupr(s), PSTR("+GPRS")))) {
-		systemVars.debugLevel += D_GPRS;
-		return(true);
-	}
-
-	if ((!strcmp_P( strupr(s), PSTR("-GPRS")))) {
-		if ( ( systemVars.debugLevel & D_GPRS) != 0 ) {
-			systemVars.debugLevel -= D_GPRS;
-			return(true);
-		}
-	}
-
-	if ((!strcmp_P( strupr(s), PSTR("ALL")))) {
-		systemVars.debugLevel = D_GPRS + D_DEBUG;
+	if ((!strcmp_P( strupr(s), PSTR("RANGE")))) {
+		systemVars.debugLevel = D_RANGE;
 		return(true);
 	}
 
 	return(false);
 }
 /*------------------------------------------------------------------------------------*/
+
 static uint8_t pv_makeArgv(void)
 {
 // A partir de la linea de comando, genera un array de punteros a c/token
@@ -733,9 +825,53 @@ uint16_t pos;
 		pos += snprintf_P( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ),PSTR( "%04d%02d%02d,"),Aframe.rtc.year,Aframe.rtc.month,Aframe.rtc.day );
 		pos += snprintf_P( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ), PSTR("%02d%02d%02d,"),Aframe.rtc.hour,Aframe.rtc.min, Aframe.rtc.sec );
 
-		// Bateria
-		pos += snprintf_P( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ), PSTR(",bt=%.2f}\r\n\0"),Aframe.batt );
+		// Datos
+		pos += snprintf_P( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ), PSTR(",H=%d"), Aframe.range );
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	}
+}
+//------------------------------------------------------------------------------------
+static void pv_cmd_pulse(void)
+{
+	// pulse on|off
+	// El pulso lo vemos del lado del sensor por lo que al pasar por un inversor
+	// debemos cambiar el sentido
+	if (!strcmp_P( strupr(argv[2]), PSTR("ON\0")) ) {
+		IO_clr_UPULSE_RUN();
+		pv_snprintfP_OK();
+		return;
+	}
+
+	if (!strcmp_P( strupr(argv[2]), PSTR("OFF\0")) ) {
+		IO_set_UPULSE_RUN();
+		pv_snprintfP_OK();
+		return;
+	}
+
+	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("cmd ERROR: ( write pulse on{off} )\r\n\0"));
+	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+	return;
+}
+//------------------------------------------------------------------------------------
+static void pv_cmd_testpin(void)
+{
+	// pulse on|off
+	// El pulso lo vemos del lado del sensor por lo que al pasar por un inversor
+	// debemos cambiar el sentido
+	if (!strcmp_P( strupr(argv[2]), PSTR("ON\0")) ) {
+		IO_set_TEST_PIN();
+		pv_snprintfP_OK();
+		return;
+	}
+
+	if (!strcmp_P( strupr(argv[2]), PSTR("OFF\0")) ) {
+		IO_clear_TEST_PIN();
+		pv_snprintfP_OK();
+		return;
+	}
+
+	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("cmd ERROR: ( write testpin on{off} )\r\n\0"));
+	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+	return;
 }
 //------------------------------------------------------------------------------------

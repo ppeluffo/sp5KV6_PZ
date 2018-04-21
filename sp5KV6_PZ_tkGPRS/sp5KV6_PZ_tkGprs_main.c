@@ -71,6 +71,7 @@ char c;
 	while ( !startTask )
 		vTaskDelay( ( TickType_t)( 100 / portTICK_RATE_MS ) );
 
+	vTaskDelay( ( TickType_t)( 100 / portTICK_RATE_MS ) );
 	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("starting tkGprsRX..\r\n\0"));
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
@@ -84,9 +85,7 @@ char c;
 		xResult = xTaskNotifyWait( 0x00, ULONG_MAX, &ulNotifiedValue, ((TickType_t) 10 / portTICK_RATE_MS ) );
 		if ( xResult == pdTRUE ) {
 
-			if ( ( ulNotifiedValue & TK_PARAM_RELOAD ) != 0 ) {		// Mensaje de reload configuration.
-				GPRS_stateVars.signal_reload = true;
-			} else if ( ( ulNotifiedValue & TK_REDIAL ) != 0 ) {  	// Mensaje de read frame desde el cmdLine.
+			if ( ( ulNotifiedValue & TK_REDIAL ) != 0 ) {  	// Mensaje de read frame desde el cmdLine.
 				GPRS_stateVars.signal_redial = true;
 			} else if ( ( ulNotifiedValue & TK_FRAME_READY ) != 0 ) {  	// Mensaje de tilt desde tkControl.
 				GPRS_stateVars.signal_frameReady = true;

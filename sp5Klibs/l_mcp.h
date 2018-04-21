@@ -40,6 +40,7 @@
 #define MCP0_DDR	DDRD
 #define MCP0_MASK	0x20
 
+
 #define MCP1_PORT	PORTB
 #define MCP1_PIN	PINB
 #define MCP1_BIT	2

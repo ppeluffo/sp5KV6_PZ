@@ -49,10 +49,8 @@ bool exit_flag = false;
 
 	GPRS_stateVars.state = G_DATA;
 
-	if ( (systemVars.debugLevel & (D_BASIC + D_GPRS) ) != 0) {
-		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::data: \r\n\0"), u_now() );
-		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
-	}
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::data: \r\n\0"), u_now() );
+	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	//
 	while ( 1 ) {
@@ -103,13 +101,6 @@ static bool pv_procesar_signals_data( bool *exit_flag )
 
 bool ret_f = false;
 
-	if ( GPRS_stateVars.signal_reload) {
-		// Salgo a reiniciar tomando los nuevos parametros.
-		*exit_flag = bool_RESTART;
-		ret_f = true;
-		goto EXIT;
-	}
-
 	if ( GPRS_stateVars.signal_redial) {
 		// Salgo a discar inmediatamente.
 		*exit_flag = bool_RESTART;
@@ -124,7 +115,6 @@ bool ret_f = false;
 	ret_f = false;
 EXIT:
 
-	GPRS_stateVars.signal_reload = false;
 	GPRS_stateVars.signal_redial = false;
 	GPRS_stateVars.signal_frameReady = false;
 
@@ -160,7 +150,7 @@ uint16_t pos = 0;
 		exit_flag = true;
 	}
 
-	if ( (systemVars.debugLevel & D_GPRS ) != 0) {
+	if ( systemVars.debugLevel == D_GPRS ) {
 		pos = snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::data: [wrPtr=%d,rdPtr=%d,delPtr=%d][Free=%d,4del=%d]"),u_now(), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
 		if ( exit_flag == false ) {
 			pos += snprintf_P( &gprs_printfBuff[pos], ( sizeof(gprs_printfBuff) - pos ),PSTR(" EMPTY\r\n\0" ));
@@ -250,7 +240,7 @@ uint16_t pos;
 	FreeRTOS_write( &pdUART0, gprs_printfBuff, pos );
 
 	// DebugMsg
-	if ( (systemVars.debugLevel & D_GPRS ) != 0) {
+	if ( systemVars.debugLevel == D_GPRS ) {
 		g_print_debug_gprs_header("GPRS::data:");
 		snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("\r\n\0" ));
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
@@ -278,7 +268,7 @@ uint16_t pos = 0;
 	FreeRTOS_write( &pdUART0, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	// DebugMsg
-	if ( (systemVars.debugLevel & D_GPRS ) != 0) {
+	if ( systemVars.debugLevel == D_GPRS ) {
 		g_print_debug_gprs_header("GPRS::data:");
 		snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("\r\n\0" ));
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
@@ -312,7 +302,7 @@ StatBuffer_t pxFFStatBuffer;
 
 	// Valores analogicos
 	// Bateria
-	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ), PSTR(",bt=%.2f"),Aframe.batt );
+	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ), PSTR(",H=%d"), Aframe.range );
 
 	// Paso 3: Trasmito por el modem.
 	FreeRTOS_ioctl( &pdUART0,ioctl_UART_CLEAR_RX_BUFFER, NULL, false);
@@ -321,7 +311,7 @@ StatBuffer_t pxFFStatBuffer;
 	FreeRTOS_write( &pdUART0, gprs_printfBuff, pos );
 
 	// Paso 4: Log
-	if ( (systemVars.debugLevel & D_GPRS ) != 0) {
+	if ( systemVars.debugLevel == D_GPRS ) {
 		g_print_debug_gprs_header("GPRS::data:");
 		snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("\r\n\0" ));
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
@@ -440,7 +430,7 @@ uint8_t recds_borrados = 0;
 		recds_borrados++;
 		FF_stat(&pxFFStatBuffer);
 
-		if ( (systemVars.debugLevel & D_GPRS) != 0) {
+		if ( systemVars.debugLevel == D_GPRS ) {
 			snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::data: [wrPtr=%d,rdPtr=%d,delPtr=%d][Free=%d,4del=%d]\r\n\0"),u_now(), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
 			FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 		}

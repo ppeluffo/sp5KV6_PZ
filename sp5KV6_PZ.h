@@ -28,12 +28,10 @@
 #include <util/delay.h>
 #include <avr/cpufunc.h>
 
-#include <l_adc7828.h>
 #include <l_file.h>
 #include <l_rtc.h>
 #include <l_iopines.h>
 #include <l_mcp.h>
-#include <l_outputs.h>
 
 #include "sp5Klibs/avrlibdefs.h"
 #include "sp5Klibs/avrlibtypes.h"
@@ -53,7 +51,7 @@
 
 // DEFINICION DEL TIPO DE SISTEMA
 //----------------------------------------------------------------------------
-#define SP5K_REV "0.0.1"
+#define SP5K_REV "0.0.2"
 #define SP5K_DATE "@ 20180420"
 
 #define SP5K_MODELO "sp5KV%_PZ HW:avr1284P R5.0"
@@ -70,20 +68,23 @@
 #define tkControl_STACK_SIZE	512
 #define tkGprs_STACK_SIZE		512
 #define tkGprsRx_STACK_SIZE		512
+#define tkRange_STACK_SIZE		512
 
 /* Prioridades de las tareas */
 #define tkCmd_TASK_PRIORITY	 		( tskIDLE_PRIORITY + 1 )
 #define tkControl_TASK_PRIORITY	 	( tskIDLE_PRIORITY + 1 )
 #define tkGprs_TASK_PRIORITY 		( tskIDLE_PRIORITY + 1 )
 #define tkGprsRx_TASK_PRIORITY 		( tskIDLE_PRIORITY + 1 )
+#define tkRange_TASK_PRIORITY 		( tskIDLE_PRIORITY + 1 )
 
 /* Prototipos de tareas */
 void tkCmd(void * pvParameters);
 void tkControl(void * pvParameters);
 void tkGprsTx(void * pvParameters);
 void tkGprsRx(void * pvParameters);
+void tkRange(void * pvParameters);
 
-TaskHandle_t xHandle_tkCmd, xHandle_tkControl, xHandle_tkGprs, xHandle_tkGprsRx;
+TaskHandle_t xHandle_tkCmd, xHandle_tkControl, xHandle_tkGprs, xHandle_tkGprsRx, xHandle_tkRange;
 
 bool startTask;
 typedef struct {
@@ -94,7 +95,6 @@ typedef struct {
 wdgStatus_t wdgStatus;
 
 // Mensajes entre tareas
-#define TK_PARAM_RELOAD			0x01	// param reload
 #define TK_READ_FRAME			0x02	// to tkAnalogIN: (mode service) read a frame
 #define TK_FRAME_READY			0x08	//
 #define TK_REDIAL				0x10	//
@@ -104,7 +104,7 @@ wdgStatus_t wdgStatus;
 xSemaphoreHandle sem_SYSVars;
 #define MSTOTAKESYSVARSSEMPH ((  TickType_t ) 10 )
 
-typedef enum { D_NONE = 0, D_BASIC = 1, D_GPRS = 4, D_DEBUG = 64 } t_debug;
+typedef enum { D_NONE = 0,D_GPRS, D_RANGE, D_DEBUG  } t_debug;
 
 #define DLGID_LENGTH		12
 #define APN_LENGTH			32
@@ -119,7 +119,7 @@ typedef enum { D_NONE = 0, D_BASIC = 1, D_GPRS = 4, D_DEBUG = 64 } t_debug;
 typedef struct {
 	// size = 7+5+5+4+3*4+1 = 33 bytes
 	RtcTimeType_t rtc;						// 7
-	double batt;							// 4
+	int16_t range;
 } frameData_t;	// 39 bytes
 
 typedef struct {

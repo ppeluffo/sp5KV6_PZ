@@ -29,10 +29,8 @@ bool exit_flag = false;
 	//u_uarts_ctl(0);
 
 	// Secuencia para apagar el modem y dejarlo en modo low power.
-	if ( (systemVars.debugLevel & (D_BASIC + D_GPRS) ) != 0) {
-		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::wait: Apago modem\r\n\0"), u_now());
-		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
-	}
+	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::wait: Apago modem\r\n\0"), u_now());
+	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	GPRS_stateVars.modem_prendido = false;
 	strncpy_P(systemVars.dlg_ip_address, PSTR("000.000.000.000\0"),16);
@@ -108,13 +106,6 @@ static bool pv_procesar_signals_espera( bool *exit_flag )
 
 bool ret_f = false;
 
-	if ( GPRS_stateVars.signal_reload) {
-		// Salgo a reiniciar tomando los nuevos parametros.
-		*exit_flag = bool_RESTART;
-		ret_f = true;
-		goto EXIT;
-	}
-
 	if ( GPRS_stateVars.signal_redial) {
 		// Salgo a discar inmediatamente.
 		*exit_flag = bool_CONTINUAR;
@@ -132,7 +123,6 @@ bool ret_f = false;
 	ret_f = false;
 EXIT:
 
-	GPRS_stateVars.signal_reload = false;
 	GPRS_stateVars.signal_redial = false;
 	GPRS_stateVars.signal_frameReady = false;
 

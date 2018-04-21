@@ -30,14 +30,14 @@ void MCP_init(uint8_t device_id )
 	// Como accedo al bus I2C, debo hacerlo una vez que arranco el RTOS.
 
 	// Inicializo los pines del micro como entradas para las interrupciones del MCP.
-	cbi(MCP0_DDR, MCP0_BIT);
-	cbi(MCP1_DDR, MCP1_BIT);
 
 	switch(device_id) {
 	case 0:
+		cbi(MCP0_DDR, MCP0_BIT);
 		pvMCP_init_MCP0();
 		break;
 	case 1:
+		cbi(MCP1_DDR, MCP1_BIT);
 		pvMCP_init_MCP1();
 		break;
 	}

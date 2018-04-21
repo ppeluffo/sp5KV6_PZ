@@ -174,6 +174,7 @@ unsigned int i,j;
 	xTaskCreate(tkControl, "CTL", tkControl_STACK_SIZE, NULL, tkControl_TASK_PRIORITY,  &xHandle_tkControl);
 	xTaskCreate(tkGprsTx, "GPRS", tkGprs_STACK_SIZE, NULL, tkGprs_TASK_PRIORITY,  &xHandle_tkGprs);
 	xTaskCreate(tkGprsRx, "GPRX", tkGprsRx_STACK_SIZE, NULL, tkGprsRx_TASK_PRIORITY,  &xHandle_tkGprsRx);
+	xTaskCreate(tkRange, "RANGE", tkRange_STACK_SIZE, NULL, tkRange_TASK_PRIORITY,  &xHandle_tkRange);
 
 	systemWdg = WDG_CTL + WDG_CMD;
 

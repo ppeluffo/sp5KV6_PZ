@@ -34,7 +34,7 @@ void g_printRxBuffer(void)
 	// Imprime la respuesta a un comando.
 	// Utiliza el buffer de RX.
 
-	if ( (systemVars.debugLevel & D_GPRS) != 0) {
+	if ( systemVars.debugLevel == D_GPRS ) {
 		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::rxbuff: \r\n\0"), u_now() );
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
@@ -63,7 +63,7 @@ uint8_t pin_dcd;
 uint8_t tries;
 bool exit_flag = false;
 
-	if ( (systemVars.debugLevel & (D_GPRS) ) != 0) {
+	if ( systemVars.debugLevel == D_GPRS ) {
 		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::sock: opening\r\n\0"), u_now() );
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 	}
@@ -104,7 +104,7 @@ bool exit_flag = false;
 
 	if ( ( GPRS_stateVars.modem_prendido == true ) && (pin_dcd == 0 ) ){
 
-		if ( (systemVars.debugLevel & (D_GPRS) ) != 0) {
+		if ( systemVars.debugLevel == D_GPRS ) {
 			snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::sock: OPEN\r\n\0"), u_now() );
 			FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 		}
@@ -112,7 +112,7 @@ bool exit_flag = false;
 
 	} else {
 
-		if ( (systemVars.debugLevel & (D_GPRS) ) != 0) {
+		if ( systemVars.debugLevel == D_GPRS ) {
 			snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::sock: CLOSED\r\n\0"), u_now() );
 			FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 		}

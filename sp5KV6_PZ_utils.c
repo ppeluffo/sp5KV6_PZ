@@ -130,7 +130,7 @@ void u_loadDefaults(void)
 	systemVars.roaming = false;
 
 	// DEBUG
-	systemVars.debugLevel = D_BASIC;
+	systemVars.debugLevel = D_NONE;
 
 	strncpy_P(systemVars.server_ip_address, PSTR("192.168.0.9\0"),IP_LENGTH);
 	systemVars.timerPoll = 300;			// Poleo c/5 minutos
