@@ -33,13 +33,32 @@ typedef enum { LOW = 0, HIGH } t_low_high;
 #define TEST_DDR		DDRD
 #define TEST_MASK		0x40
 
-// TERMINAL
-// Pin de control de fuente de la terminal ( PD7)
-#define TERMSW_PORT		PORTD
-#define TERMSW_PIN		PIND
-#define TERMSW_BIT		7
-#define TERMSW_DDR		DDRD
-#define TERMSW_MASK		0x80
+// Entradas digitales:
+// D1=PC4, D0=PD7
+// OJO: En los equipos comunes, el PD7 es el pin que se usa para detectar
+// si prendo o no la terminal. !!!!!
+//#define TERMSW_PORT		PORTD
+//#define TERMSW_PIN		PIND
+//#define TERMSW_BIT		7
+//#define TERMSW_DDR		DDRD
+//#define TERMSW_MASK		0x80
+#define D0_PORT		PORTD
+#define D0_PIN		PIND
+#define D0_BIT		7
+#define D0_DDR		DDRD
+#define D0_MASK		0x80
+
+#define IO_config_D0()	cbi(D0_DDR, D0_BIT);
+uint8_t IO_read_D0(void);
+
+#define D1_PORT		PORTC
+#define D1_PIN		PINC
+#define D1_BIT		4
+#define D1_DDR		DDRC
+#define D1_MASK		0x10
+
+#define IO_config_D1()	cbi(D1_DDR, D1_BIT);
+uint8_t IO_read_D1(void);
 
 // DCD
 // Como el MCP23018 a veces no detecta el nivel del modem, cableamos
@@ -59,9 +78,6 @@ typedef enum { LOW = 0, HIGH } t_low_high;
 #define IO_config_TEST_PIN()	(sbi(TEST_DDR, TEST_BIT))
 #define IO_set_TEST_PIN() 		(sbi(TEST_PORT, TEST_BIT))
 #define IO_clear_TEST_PIN() 	(cbi(TEST_PORT, TEST_BIT))
-
-//#define IO_set_led_MODEM_analogBoard() 	(cbi(LED_MODEM_PORT, LED_MODEM_BIT))
-//#define IO_clear_led_MODEM_analogBoard() (sbi(LED_MODEM_PORT, LED_MODEM_BIT))
 
 #define IO_term_pwr_on() 	( MCP_modify( MCP0_ADDR, MCP0_GPIO, 1, MCP0_GPIO_OTERMPWR ) )
 #define IO_term_pwr_off() 	( MCP_modify( MCP0_ADDR, MCP0_GPIO, 0, MCP0_GPIO_OTERMPWR ) )

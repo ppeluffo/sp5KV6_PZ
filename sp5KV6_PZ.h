@@ -52,7 +52,7 @@
 
 // DEFINICION DEL TIPO DE SISTEMA
 //----------------------------------------------------------------------------
-#define SP5K_REV "0.0.1"
+#define SP5K_REV "5.0.2"
 #define SP5K_DATE "@ 20180423"
 
 #define SP5K_MODELO "sp5KV6_PZ HW:avr1284P R5.0"

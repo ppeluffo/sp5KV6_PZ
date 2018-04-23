@@ -195,9 +195,6 @@ static void pv_initMPU(void)
 
 	// Configuracion de pines:
 
-	// El pin de control de la terminal es entrada
-	cbi(TERMSW_DDR, TERMSW_BIT);
-
 	// El pin de DCD es entrada
 	//cbi(DCD_DDR, DCD_BIT);
 
@@ -207,6 +204,10 @@ static void pv_initMPU(void)
 	// RANGE
 	IO_config_UPULSE_RUN();
 	IO_config_UPULSE_WIDTH();
+
+	// Entradas digitales
+	IO_config_D0();
+	IO_config_D1();
 
 	// Configuro el modo de Sleep.
 	//set_sleep_mode(SLEEP_MODE_PWR_SAVE);

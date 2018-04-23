@@ -76,15 +76,26 @@ bool exit_flag = false;
 			while( sleep_time-- > 0 ) {
 
 				// PROCESO LAS SEÑALES
-				if ( pv_procesar_signals_data( &exit_flag )) {
-					// Si recibi alguna senal, debo salir.
+				if ( GPRS_stateVars.signal_redial) {
+					// Salgo a discar inmediatamente.
+					GPRS_stateVars.signal_redial = false;
+					exit_flag = bool_RESTART;
 					goto EXIT;
+				}
+
+				if ( GPRS_stateVars.signal_frameReady) {
+					// No espero mas. Voy a leer el dato y trasmitirlo
+					GPRS_stateVars.signal_frameReady = false;
+				//	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::data: SIGNAL \r\n\0", u_now() );
+				//	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
+					break;
 				}
 
 				vTaskDelay( (portTickType)( 1000 / portTICK_RATE_MS ) );
 
 			} // while
 
+			vTaskDelay( (portTickType)( 1000 / portTICK_RATE_MS ) );
 
 		} // else
 
@@ -314,7 +325,7 @@ StatBuffer_t pxFFStatBuffer;
 	FreeRTOS_write( &pdUART0, gprs_printfBuff, pos );
 
 	// Paso 4: Log
-	if ( systemVars.debugLevel == D_GPRS ) {
+//	if ( systemVars.debugLevel == D_GPRS ) {
 		g_print_debug_gprs_header("GPRS::data:");
 		//FRTOS_snprintf( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),"\r\n\0");
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
@@ -327,7 +338,7 @@ StatBuffer_t pxFFStatBuffer;
 			FRTOS_snprintf( gprs_printfBuff, sizeof(gprs_printfBuff), "%s GPRS::data: sent OK. MEM[%d/%d/%d][%d/%d]\r\n\0", u_now(), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
 		}
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
-	}
+//	}
 }
 //------------------------------------------------------------------------------------
 static bool pv_check_socket_open(void)
@@ -410,7 +421,7 @@ static void pv_process_response_RESET(void)
 {
 	// El server me pide que me resetee de modo de mandar un nuevo init y reconfigurarme
 
-	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::data: Config RESET...\r\n\0",u_now());
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::data: RESET !!\r\n\0",u_now());
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	vTaskDelay( ( TickType_t)( 1000 / portTICK_RATE_MS ) );

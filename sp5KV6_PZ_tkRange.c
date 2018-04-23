@@ -6,7 +6,7 @@
  */
 
 
-#include <sp5KV6_PZ.h>
+#include "sp5KV6_PZ.h"
 
 typedef enum { RISING_EDGE = 0, FALLING_EDGE } t_edge_sensing;
 
@@ -240,8 +240,8 @@ uint16_t pos = 0;
 	RTC_read(&data_record.rtc);
 
 	// Canales digitales
-	data_record.dig0 = 0;
-	data_record.dig1 = 0;
+	data_record.dig0 = IO_read_D0();
+	data_record.dig1 = IO_read_D1();
 
     // Guardo en BD
 	bytes_written = FF_fwrite( &data_record, sizeof(data_record));

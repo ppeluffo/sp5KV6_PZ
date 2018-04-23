@@ -13,25 +13,16 @@
 #include <sp5KV6_PZ.h>
 
 //------------------------------------------------------------------------------------
-bool IO_read_pulseInputs( uint8_t *din0, uint8_t *din1 )
+uint8_t IO_read_D0(void)
 {
-
-	// Las entradas de los pulsos ( latches ) corresponden a las entradas GPB5 y GPB6 del
-	// MCP23018.
-
-bool retS;
-uint8_t regValue;
-
-	retS = MCP_read( MCP1_ADDR, MCP1_GPIOB, &regValue);
-	*din0 = ( regValue & 0x40) >> 6;
-	*din1 = ( regValue & 0x20) >> 5;
-	return(retS);
+	// El D0 se cablea a PD7.
+	return ( ( D0_PIN & _BV(D0_BIT) ) >> D0_BIT );
 }
 //------------------------------------------------------------------------------------
-uint8_t IO_read_terminal_pin(void)
+uint8_t IO_read_D1(void)
 {
-	// El TERMSW se cablea a PD7.
-	return ( ( TERMSW_PIN & _BV(7) ) >> 7 );
+	// El D0 se cablea a PD7.
+	return ( ( D1_PIN & _BV(D1_BIT) ) >> D1_BIT );
 }
 //------------------------------------------------------------------------------------
 uint8_t IO_read_UPULSE_WIDTH(void)

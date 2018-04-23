@@ -116,7 +116,7 @@ static void cmdHelpFunction(void)
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  mcp {0|1} regAddr\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  rtc, frame\r\n\0");
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  din, rtc, frame\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  ee {addr}{lenght}\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
@@ -450,6 +450,13 @@ uint8_t regValue;
 		} else {
 			FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "ERROR\r\n\0");
 		}
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		return;
+	}
+
+	// DIN
+	if (!strcmp_P( strupr(argv[1]), PSTR("DIN\0"))) {
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "DIN0=%d,DIN1=%d\r\n\0", IO_read_D0(),IO_read_D1() );
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 		return;
 	}
