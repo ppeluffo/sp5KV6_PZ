@@ -9,7 +9,7 @@
  */
 
 #include <sp5KV6_PZ.h>
-#include "sp5KV6_PZ_tkGPRS/sp5KV6_PZ_tkGprs.h"
+//#include "sp5KV6_PZ_tkGPRS/sp5KV6_PZ_tkGprs.h"
 
 static char ctl_printfBuff[CHAR128];
 
@@ -32,9 +32,9 @@ void tkControl(void * pvParameters)
 	pv_tkControl_init();
 	pv_init_show_reset_cause();
 
-	snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("-----------------\r\n\0"));
+	FRTOS_snprintf( ctl_printfBuff,sizeof(ctl_printfBuff),"-----------------\r\n\0");
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
-	snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("starting tkControl..\r\n\0"));
+	FRTOS_snprintf( ctl_printfBuff,sizeof(ctl_printfBuff),"starting tkControl..\r\n\0");
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 
 	// Loop
@@ -112,7 +112,7 @@ static uint32_t ticks_to_reset = 86400; // Segundos en 1 dia.
 		return;
 	}
 
-	snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("%s CTL::reset: Daily Reset !!\r\n\0"), u_now() );
+	FRTOS_snprintf( ctl_printfBuff,sizeof(ctl_printfBuff),"%s CTL::reset: Daily Reset !!\r\n\0", u_now() );
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 	vTaskDelay( ( TickType_t)( 1000 / portTICK_RATE_MS ) );
 	wdt_enable(WDTO_30MS);
@@ -147,15 +147,15 @@ uint16_t recSize;
 	}
 
 	// Configuro el ID en el bluetooth: debe hacerse antes que nada
-	snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("AT+NAME%s\r\n"),systemVars.dlgId);
+	FRTOS_snprintf( ctl_printfBuff,sizeof(ctl_printfBuff),"AT+NAME%s\r\n",systemVars.dlgId);
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 	vTaskDelay( ( TickType_t)( 2000 / portTICK_RATE_MS ) );
 
 	// Mensaje de load Status.
 	if ( loadParamStatus ) {
-		snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("Load config OK.\r\n\0") );
+		FRTOS_snprintf( ctl_printfBuff,sizeof(ctl_printfBuff),"Load config OK.\r\n\0");
 	} else {
-		snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("Load config ERROR: defaults !!\r\n\0") );
+		FRTOS_snprintf( ctl_printfBuff,sizeof(ctl_printfBuff),"Load config ERROR: defaults !!\r\n\0" );
 	}
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 
@@ -163,19 +163,18 @@ uint16_t recSize;
 	ffRcd = FF_fopen();
 	FF_stat(&pxFFStatBuffer);
 	if ( pxFFStatBuffer.errno != pdFF_ERRNO_NONE ) {
-		snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("FSInit ERROR (%d)[%d]\r\n\0"),ffRcd, pxFFStatBuffer.errno);
+		FRTOS_snprintf( ctl_printfBuff,sizeof(ctl_printfBuff),"FSInit ERROR (%d)[%d]\r\n\0",ffRcd, pxFFStatBuffer.errno);
 	} else {
-		snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("FSInit OK\r\nMEMsize=%d, wrPtr=%d,rdPtr=%d,delPtr=%d,Free=%d,4del=%d\r\n\0"),FF_MAX_RCDS, pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
+		FRTOS_snprintf( ctl_printfBuff,sizeof(ctl_printfBuff),"FSInit OK\r\nMEMsize=%d, wrPtr=%d,rdPtr=%d,delPtr=%d,Free=%d,4del=%d\r\n\0",FF_MAX_RCDS, pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
 	}
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 
 	// Tamanio de registro de memoria
 	recSize = sizeof(frameData_t);
-	snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("RCD size %d bytes.\r\n\0"),recSize);
+	FRTOS_snprintf( ctl_printfBuff,sizeof(ctl_printfBuff),"RCD size %d bytes.\r\n\0",recSize );
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 
-	pos = snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("Modules:: BASIC+RANGE\0"));
-	pos += snprintf_P( &ctl_printfBuff[pos],sizeof(ctl_printfBuff),PSTR("\r\n"));
+	FRTOS_snprintf( ctl_printfBuff,sizeof(ctl_printfBuff),"Modules:: BASIC+RANGE\r\n\0");
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 
 	// Habilito al resto de las tareas a arrancar.
@@ -189,23 +188,23 @@ uint8_t pos;
 
 	// Muestro la razon del ultimo reseteo
 
-	pos = snprintf_P( ctl_printfBuff,sizeof(ctl_printfBuff),PSTR("Init code (0x%X"),wdgStatus.resetCause);
+	pos = FRTOS_snprintf( ctl_printfBuff,sizeof(ctl_printfBuff),"Init code (0x%X",wdgStatus.resetCause);
 	if (wdgStatus.resetCause & 0x01 ) {
-		pos += snprintf_P( &ctl_printfBuff[pos],sizeof(ctl_printfBuff),PSTR(" PORF"));
+		pos += FRTOS_snprintf( &ctl_printfBuff[pos],sizeof(ctl_printfBuff)," PORF");
 	}
 	if (wdgStatus.resetCause & 0x02 ) {
-		pos += snprintf_P( &ctl_printfBuff[pos],sizeof(ctl_printfBuff),PSTR(" EXTRF"));
+		pos += FRTOS_snprintf( &ctl_printfBuff[pos],sizeof(ctl_printfBuff)," EXTRF");
 	}
 	if (wdgStatus.resetCause & 0x04 ) {
-		pos += snprintf_P( &ctl_printfBuff[pos],sizeof(ctl_printfBuff),PSTR(" BORF"));
+		pos += FRTOS_snprintf( &ctl_printfBuff[pos],sizeof(ctl_printfBuff)," BORF");
 	}
 	if (wdgStatus.resetCause & 0x08 ) {
-		pos += snprintf_P( &ctl_printfBuff[pos],sizeof(ctl_printfBuff),PSTR(" WDRF"));
+		pos += FRTOS_snprintf( &ctl_printfBuff[pos],sizeof(ctl_printfBuff)," WDRF");
 	}
 	if (wdgStatus.resetCause & 0x10 ) {
-		pos += snprintf_P( &ctl_printfBuff[pos],sizeof(ctl_printfBuff),PSTR(" JTRF"));
+		pos += FRTOS_snprintf( &ctl_printfBuff[pos],sizeof(ctl_printfBuff)," JTRF");
 	}
-	pos += snprintf_P( &ctl_printfBuff[pos],sizeof(ctl_printfBuff),PSTR(" )\r\n\0"));
+	pos += FRTOS_snprintf( &ctl_printfBuff[pos],sizeof(ctl_printfBuff)," )\r\n\0");
 	FreeRTOS_write( &pdUART1, ctl_printfBuff, sizeof(ctl_printfBuff) );
 
 }

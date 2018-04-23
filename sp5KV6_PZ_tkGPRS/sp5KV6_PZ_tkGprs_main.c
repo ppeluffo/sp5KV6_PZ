@@ -16,7 +16,7 @@ void tkGprsTx(void * pvParameters)
 	while ( !startTask )
 		vTaskDelay( ( TickType_t)( 100 / portTICK_RATE_MS ) );
 
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("starting tkGprsTx..\r\n\0"));
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"starting tkGprsTx..\r\n\0");
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 	vTaskDelay( ( TickType_t)( 1000 / portTICK_RATE_MS ) );
 
@@ -72,7 +72,7 @@ char c;
 		vTaskDelay( ( TickType_t)( 100 / portTICK_RATE_MS ) );
 
 	vTaskDelay( ( TickType_t)( 100 / portTICK_RATE_MS ) );
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("starting tkGprsRX..\r\n\0"));
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"starting tkGprsRX..\r\n\0");
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	g_flushRXBuffer();

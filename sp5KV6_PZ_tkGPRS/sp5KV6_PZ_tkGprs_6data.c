@@ -49,7 +49,7 @@ bool exit_flag = false;
 
 	GPRS_stateVars.state = G_DATA;
 
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::data: \r\n\0"), u_now() );
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::data: \r\n\0", u_now() );
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	//
@@ -151,11 +151,11 @@ uint16_t pos = 0;
 	}
 
 	if ( systemVars.debugLevel == D_GPRS ) {
-		pos = snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::data: [wrPtr=%d,rdPtr=%d,delPtr=%d][Free=%d,4del=%d]"),u_now(), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
+		pos = FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::data: [wrPtr=%d,rdPtr=%d,delPtr=%d][Free=%d,4del=%d]",u_now(), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
 		if ( exit_flag == false ) {
-			pos += snprintf_P( &gprs_printfBuff[pos], ( sizeof(gprs_printfBuff) - pos ),PSTR(" EMPTY\r\n\0" ));
+			pos += FRTOS_snprintf( &gprs_printfBuff[pos], ( sizeof(gprs_printfBuff) - pos )," EMPTY\r\n\0");
 		} else {
-			pos += snprintf_P( &gprs_printfBuff[pos], ( sizeof(gprs_printfBuff) - pos ),PSTR("\r\n\0" ));
+			pos += FRTOS_snprintf( &gprs_printfBuff[pos], ( sizeof(gprs_printfBuff) - pos ),"\r\n\0" );
 		}
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 	}
@@ -230,11 +230,11 @@ uint16_t pos;
 
 	// Armo el header en el buffer
 	memset( gprs_printfBuff, '\0', sizeof(gprs_printfBuff));
-	pos = snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("GET " ));
-	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("%s"), systemVars.serverScript );
-	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("?DLGID=%s"), systemVars.dlgId );
-	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("&PASSWD=%s"), systemVars.passwd );
-	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("&VER=%s"), SP5K_REV );
+	pos = FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"GET ");
+	pos += FRTOS_snprintf( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),"%s", systemVars.serverScript );
+	pos += FRTOS_snprintf( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),"?DLGID=%s", systemVars.dlgId );
+	pos += FRTOS_snprintf( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),"&PASSWD=%s", systemVars.passwd );
+	pos += FRTOS_snprintf( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),"&VER=%s", SP5K_REV );
 
 	// Trasmito
 	FreeRTOS_write( &pdUART0, gprs_printfBuff, pos );
@@ -242,7 +242,7 @@ uint16_t pos;
 	// DebugMsg
 	if ( systemVars.debugLevel == D_GPRS ) {
 		g_print_debug_gprs_header("GPRS::data:");
-		snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("\r\n\0" ));
+		FRTOS_snprintf( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),"\r\n\0" );
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 	}
 
@@ -260,9 +260,9 @@ uint16_t pos = 0;
 
 	memset( gprs_printfBuff, '\0', sizeof(gprs_printfBuff));
 
-	pos = snprintf_P( gprs_printfBuff, ( sizeof(gprs_printfBuff) - pos ),PSTR(" HTTP/1.1\n") );
-	pos += snprintf_P( &gprs_printfBuff[pos], ( sizeof(gprs_printfBuff) - pos ),PSTR("Host: www.spymovil.com\n" ));
-	pos += snprintf_P( &gprs_printfBuff[pos], ( sizeof(gprs_printfBuff) - pos ),PSTR("\n\n\0" ));
+	pos = FRTOS_snprintf( gprs_printfBuff, ( sizeof(gprs_printfBuff) - pos )," HTTP/1.1\n" );
+	pos += FRTOS_snprintf( &gprs_printfBuff[pos], ( sizeof(gprs_printfBuff) - pos ),"Host: www.spymovil.com\n");
+	pos += FRTOS_snprintf( &gprs_printfBuff[pos], ( sizeof(gprs_printfBuff) - pos ),"\n\n\0" );
 
 	// Trasmito
 	FreeRTOS_write( &pdUART0, gprs_printfBuff, sizeof(gprs_printfBuff) );
@@ -270,9 +270,9 @@ uint16_t pos = 0;
 	// DebugMsg
 	if ( systemVars.debugLevel == D_GPRS ) {
 		g_print_debug_gprs_header("GPRS::data:");
-		snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("\r\n\0" ));
+		FRTOS_snprintf( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),"\r\n\0");
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
-		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::data: Frame enviado\r\n\0"), u_now());
+		FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::data: Frame enviado\r\n\0", u_now());
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 	}
 
@@ -293,18 +293,21 @@ StatBuffer_t pxFFStatBuffer;
 	// Siempre trasmito los datos aunque vengan papasfritas.
 	memset( gprs_printfBuff, '\0', sizeof(gprs_printfBuff));
 	// Indice de la linea
-	pos = snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("&CTL=%d"), pxFFStatBuffer.RD );
+	pos = FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"&CTL=%d", pxFFStatBuffer.RD );
 	//
-	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("&LINE=") );
+	pos += FRTOS_snprintf( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),"&LINE=" );
 	// Fecha y hora
-	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR( "%04d%02d%02d,"),Aframe.rtc.year,Aframe.rtc.month,Aframe.rtc.day );
-	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ), PSTR("%02d%02d%02d"),Aframe.rtc.hour,Aframe.rtc.min, Aframe.rtc.sec );
+	pos += FRTOS_snprintf( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),"%04d%02d%02d,",Aframe.rtc.year,Aframe.rtc.month,Aframe.rtc.day );
+	pos += FRTOS_snprintf( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),"%02d%02d%02d",Aframe.rtc.hour,Aframe.rtc.min, Aframe.rtc.sec );
 
-	// Valores analogicos
-	// Bateria
-	pos += snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ), PSTR(",H=%d"), Aframe.range );
+	// C0 ( Range )
+	pos += FRTOS_snprintf( &gprs_printfBuff[pos], ( sizeof(gprs_printfBuff) - pos ), ",%s=%d", systemVars.chName[0], Aframe.range );
+	// C1
+	pos += FRTOS_snprintf( &gprs_printfBuff[pos], ( sizeof(gprs_printfBuff) - pos ), ",%s=%d", systemVars.chName[1], Aframe.dig0 );
+	// C2
+	pos += FRTOS_snprintf( &gprs_printfBuff[pos], ( sizeof(gprs_printfBuff) - pos ), ",%s=%d", systemVars.chName[2], Aframe.dig1 );
 
-	// Paso 3: Trasmito por el modem.
+	// Paso 3: Trasmito por el modem sin el \r
 	FreeRTOS_ioctl( &pdUART0,ioctl_UART_CLEAR_RX_BUFFER, NULL, false);
 	FreeRTOS_ioctl( &pdUART0,ioctl_UART_CLEAR_TX_BUFFER, NULL, false);
 	g_flushRXBuffer();
@@ -313,14 +316,15 @@ StatBuffer_t pxFFStatBuffer;
 	// Paso 4: Log
 	if ( systemVars.debugLevel == D_GPRS ) {
 		g_print_debug_gprs_header("GPRS::data:");
-		snprintf_P( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),PSTR("\r\n\0" ));
+		//FRTOS_snprintf( &gprs_printfBuff[pos],( sizeof(gprs_printfBuff) - pos ),"\r\n\0");
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
+		FreeRTOS_write( &pdUART1, "\r\n", sizeof("\r\n") );
 
 		// Agrego mem.stats
 		if (pxFFStatBuffer.errno > 0 ) {
-			snprintf_P( gprs_printfBuff,  sizeof(gprs_printfBuff), PSTR("%s GPRS::data: ERROR (%d) MEM[%d/%d/%d][%d/%d]\r\n\0"), u_now(), pxFFStatBuffer.errno, pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
+			FRTOS_snprintf( gprs_printfBuff,  sizeof(gprs_printfBuff), "%s GPRS::data: ERROR (%d) MEM[%d/%d/%d][%d/%d]\r\n\0", u_now(), pxFFStatBuffer.errno, pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
 		} else {
-			snprintf_P( gprs_printfBuff, sizeof(gprs_printfBuff), PSTR("%s GPRS::data: sent OK. MEM[%d/%d/%d][%d/%d]\r\n\0"), u_now(), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
+			FRTOS_snprintf( gprs_printfBuff, sizeof(gprs_printfBuff), "%s GPRS::data: sent OK. MEM[%d/%d/%d][%d/%d]\r\n\0", u_now(), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
 		}
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 	}
@@ -406,7 +410,7 @@ static void pv_process_response_RESET(void)
 {
 	// El server me pide que me resetee de modo de mandar un nuevo init y reconfigurarme
 
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::data: Config RESET...\r\n\0" ),u_now());
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::data: Config RESET...\r\n\0",u_now());
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	vTaskDelay( ( TickType_t)( 1000 / portTICK_RATE_MS ) );
@@ -431,7 +435,7 @@ uint8_t recds_borrados = 0;
 		FF_stat(&pxFFStatBuffer);
 
 		if ( systemVars.debugLevel == D_GPRS ) {
-			snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::data: [wrPtr=%d,rdPtr=%d,delPtr=%d][Free=%d,4del=%d]\r\n\0"),u_now(), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
+			FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::data: [wrPtr=%d,rdPtr=%d,delPtr=%d][Free=%d,4del=%d]\r\n\0",u_now(), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
 			FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 		}
 

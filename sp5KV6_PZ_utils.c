@@ -30,15 +30,38 @@ uint16_t tpoll;
 	tpoll = abs((uint16_t) ( atol(s_tPoll) ));
 	if ( tpoll < 15 ) { tpoll = 15; }
 
-	while ( xSemaphoreTake( sem_SYSVars, ( TickType_t ) 1 ) != pdTRUE )
-		taskYIELD();
-
 	systemVars.timerPoll = tpoll;
-	xSemaphoreGive( sem_SYSVars );
 
 	return(true);
 }
 //------------------------------------------------------------------------------------
+bool u_configMaxRange(char *s_maxRange)
+{
+
+uint16_t maxRange;
+
+	maxRange = atoi(s_maxRange);
+	if ( maxRange < 50 ) { maxRange = 50; }
+	if ( maxRange > 750 ) {
+		return (false);
+	}
+
+	systemVars.maxRange = maxRange;
+
+	return(true);
+}
+//------------------------------------------------------------------------------------
+bool u_configChName( uint8_t channel, char *chName )
+{
+
+	if ( chName != NULL ) {
+		memset ( systemVars.chName[channel], '\0',   PARAMNAME_LENGTH );
+		memcpy( systemVars.chName[channel], chName , ( PARAMNAME_LENGTH - 1 ));
+	}
+	return(TRUE);
+}
+//----------------------------------------------------------------------------------------
+
 void u_kick_Wdg( uint8_t wdgId )
 {
 	// Pone el correspondiente bit del wdg en 0.
@@ -105,6 +128,10 @@ uint8_t i;
 	systemVars.serverScript[SCRIPT_LENGTH - 1] = '\0';
 	systemVars.passwd[PASSWD_LENGTH - 1] = '\0';
 
+	systemVars.chName[0][PARAMNAME_LENGTH - 1] = '\0';
+	systemVars.chName[1][PARAMNAME_LENGTH - 1] = '\0';
+	systemVars.chName[2][PARAMNAME_LENGTH - 1] = '\0';
+
 	return(retS);
 
 }
@@ -118,7 +145,7 @@ void u_loadDefaults(void)
 		taskYIELD();
 
 	systemVars.initByte = 0x49;
-	strncpy_P(systemVars.dlgId, PSTR("DEF400\0"),DLGID_LENGTH);
+	strncpy_P(systemVars.dlgId, PSTR("PZ000\0"),DLGID_LENGTH);
 	strncpy_P(systemVars.server_tcp_port, PSTR("80\0"),PORT_LENGTH	);
 	strncpy_P(systemVars.passwd, PSTR("spymovil123\0"),PASSWD_LENGTH);
 	strncpy_P(systemVars.serverScript, PSTR("/cgi-bin/sp5K/sp5K.pl\0"),SCRIPT_LENGTH);
@@ -128,6 +155,12 @@ void u_loadDefaults(void)
 	systemVars.gsmBand = 8;
 	strncpy_P(systemVars.apn, PSTR("SPYMOVIL.VPNANTEL\0"),APN_LENGTH);
 	systemVars.roaming = false;
+
+	systemVars.maxRange = 700;
+
+	strncpy_P(systemVars.chName[0], PSTR("H1\0"),3);
+	strncpy_P(systemVars.chName[1], PSTR("D0\0"),3);
+	strncpy_P(systemVars.chName[2], PSTR("D1\0"),3);
 
 	// DEBUG
 	systemVars.debugLevel = D_NONE;
@@ -150,7 +183,7 @@ RtcTimeType_t rtcDateTime;
 
 	RTC_read(&rtcDateTime);
 	rtcDateTime.year -= 2000;
-	snprintf_P( nowStr,sizeof(nowStr), PSTR("%02d/%02d/%02d %02d:%02d:%02d\0"),rtcDateTime.day,rtcDateTime.month,rtcDateTime.year,rtcDateTime.hour,rtcDateTime.min,rtcDateTime.sec );
+	FRTOS_snprintf( nowStr,sizeof(nowStr), "%02d/%02d/%02d %02d:%02d:%02d\0",rtcDateTime.day,rtcDateTime.month,rtcDateTime.year,rtcDateTime.hour,rtcDateTime.min,rtcDateTime.sec );
 	return(nowStr);
 }
 //------------------------------------------------------------------------------------

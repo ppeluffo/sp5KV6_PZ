@@ -1,5 +1,10 @@
 /*
  *
+ * Si da el error:
+ *  internal compiler error: in push_reload, at reload.c:1360
+ * se debe usar la optimizacion del compilador -fno-move-loop-invariants
+ * o cambiar la optimizacion
+ *
  * git commit -a -m "beta 473293390 001"
  * git remote add REM_SP5KV4 https://github.com/ppeluffo/sp5KV4.git
  * git push -u REM_SP5KV4 master
@@ -157,7 +162,6 @@ unsigned int i,j;
 	//----------------------------------------------------------------------------------------
 
 	wdt_reset();
-	IO_init_pines();
 	pv_initMPU();
 	FreeRTOS_open(pUART0, ( UART_RXFIFO + UART_TXQUEUE ));
 	FreeRTOS_open(pUART1, ( UART_RXFIFO + UART_TXQUEUE ));
@@ -188,6 +192,21 @@ unsigned int i,j;
 static void pv_initMPU(void)
 {
 	// Son acciones que se hacen antes de arrancar el RTOS
+
+	// Configuracion de pines:
+
+	// El pin de control de la terminal es entrada
+	cbi(TERMSW_DDR, TERMSW_BIT);
+
+	// El pin de DCD es entrada
+	//cbi(DCD_DDR, DCD_BIT);
+
+	IO_config_TEST_PIN();
+	IO_clear_TEST_PIN(); // Inicialmente en 0
+
+	// RANGE
+	IO_config_UPULSE_RUN();
+	IO_config_UPULSE_WIDTH();
 
 	// Configuro el modo de Sleep.
 	//set_sleep_mode(SLEEP_MODE_PWR_SAVE);

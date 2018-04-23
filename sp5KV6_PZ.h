@@ -18,7 +18,7 @@
 #include <stdarg.h>
 #include <math.h>
 #include <stdlib.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include <avr/sleep.h>
 #include <string.h>
 #include <compat/deprecated.h>
@@ -32,6 +32,7 @@
 #include <l_rtc.h>
 #include <l_iopines.h>
 #include <l_mcp.h>
+#include <FRTOS_stdio.h>
 
 #include "sp5Klibs/avrlibdefs.h"
 #include "sp5Klibs/avrlibtypes.h"
@@ -51,10 +52,10 @@
 
 // DEFINICION DEL TIPO DE SISTEMA
 //----------------------------------------------------------------------------
-#define SP5K_REV "0.0.2"
-#define SP5K_DATE "@ 20180420"
+#define SP5K_REV "0.0.1"
+#define SP5K_DATE "@ 20180423"
 
-#define SP5K_MODELO "sp5KV%_PZ HW:avr1284P R5.0"
+#define SP5K_MODELO "sp5KV6_PZ HW:avr1284P R5.0"
 #define SP5K_VERSION "FW:FRTOS8"
 
 #define CHAR64		64
@@ -64,11 +65,11 @@
 //----------------------------------------------------------------------------
 // TASKS
 /* Stack de las tareas */
-#define tkCmd_STACK_SIZE		512
-#define tkControl_STACK_SIZE	512
-#define tkGprs_STACK_SIZE		512
-#define tkGprsRx_STACK_SIZE		512
-#define tkRange_STACK_SIZE		512
+#define tkCmd_STACK_SIZE		1024
+#define tkControl_STACK_SIZE	1024
+#define tkGprs_STACK_SIZE		1024
+#define tkGprsRx_STACK_SIZE		1024
+#define tkRange_STACK_SIZE		1024
 
 /* Prioridades de las tareas */
 #define tkCmd_TASK_PRIORITY	 		( tskIDLE_PRIORITY + 1 )
@@ -106,6 +107,8 @@ xSemaphoreHandle sem_SYSVars;
 
 typedef enum { D_NONE = 0,D_GPRS, D_RANGE, D_DEBUG  } t_debug;
 
+#define NRO_CHANNELS		3
+
 #define DLGID_LENGTH		12
 #define APN_LENGTH			32
 #define PORT_LENGTH			7
@@ -117,10 +120,11 @@ typedef enum { D_NONE = 0,D_GPRS, D_RANGE, D_DEBUG  } t_debug;
 #define TIMERDIAL_FOR_CONTINUO	600
 
 typedef struct {
-	// size = 7+5+5+4+3*4+1 = 33 bytes
-	RtcTimeType_t rtc;						// 7
+	RtcTimeType_t rtc;
 	int16_t range;
-} frameData_t;	// 39 bytes
+	uint8_t dig0;
+	uint8_t dig1;
+} frameData_t;
 
 typedef struct {
 	// Variables de trabajo.
@@ -145,6 +149,10 @@ typedef struct {
 	uint8_t debugLevel;		// Indica que funciones debugear.
 	uint8_t gsmBand;
 
+	uint16_t maxRange;
+
+	char chName[NRO_CHANNELS][PARAMNAME_LENGTH];
+
 	bool roaming;
 
 } systemVarsType;
@@ -161,6 +169,8 @@ uint32_t ticks;
 // utils
 void u_uarts_ctl(uint8_t cmd);
 bool u_configTimerPoll(char *s_tPoll);
+bool u_configMaxRange(char *s_maxRange);
+bool u_configChName( uint8_t channel, char *chName );
 void u_kick_Wdg( uint8_t wdgId );
 bool u_saveSystemParams(void);
 bool u_loadSystemParams(void);

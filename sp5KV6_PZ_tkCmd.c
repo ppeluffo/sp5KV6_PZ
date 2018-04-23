@@ -6,7 +6,7 @@
  */
 
 #include <sp5KV6_PZ.h>
-#include "sp5KV6_PZ_tkGPRS/sp5KV6_PZ_tkGprs.h"
+//#include "sp5KV6_PZ_tkGPRS/sp5KV6_PZ_tkGprs.h"
 
 static char cmd_printfBuff[CHAR128];
 char *argv[16];
@@ -60,7 +60,7 @@ uint8_t ticks;
 
 	// Espero la notificacion para arrancar
 	vTaskDelay( ( TickType_t)( 500 / portTICK_RATE_MS ) );
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("starting tkCmd..\r\n\0"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff),"starting tkCmd..\r\n\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	ticks = 1;
@@ -85,7 +85,7 @@ uint8_t ticks;
 static void cmdClearScreen(void)
 {
 	// ESC [ 2 J
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("\x1B[2J\0"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff),"\x1B[2J\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 }
 /*------------------------------------------------------------------------------------*/
@@ -95,93 +95,94 @@ static void cmdHelpFunction(void)
 	pv_makeArgv();
 
 	// HELP WRITE
-	if (!strcmp_P( strupr(argv[1]), PSTR("WRITE\0"))) {
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-write\r\n\0"));
+	if (!strcmp_P( strupr(argv[1]),PSTR("WRITE\0"))) {
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff),"-write\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  mcp {devId}{regAddr}{regValue}\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  mcp {devId}{regAddr}{regValue}\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  ee addr string\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  ee addr string\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  led {0|1},gprspwr {0|1},gprssw {0|1}\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  led {0|1},gprspwr {0|1},gprssw {0|1}\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  redial\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  redial\r\n\0"));
-		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  pulse {on|off}\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  pulse {on|off}\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	}
 
 	// HELP READ
 	else if (!strcmp_P( strupr(argv[1]), PSTR("READ\0"))) {
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-read\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "-read\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  mcp {0|1} regAddr\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  mcp {0|1} regAddr\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  rtc, frame\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  rtc, frame\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  ee {addr}{lenght}\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  ee {addr}{lenght}\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  memory,gprs\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  memory,gprs\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	}
 
 	// HELP RESET
 	else if (!strcmp_P( strupr(argv[1]), PSTR("RESET\0"))) {
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-reset\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "-reset\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  memory\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  memory\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	}
 
 	// HELP CONFIG
 	else if (!strcmp_P( strupr(argv[1]), PSTR("CONFIG\0"))) {
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-config\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "-config\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  rtc YYMMDDhhmm\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  rtc YYMMDDhhmm\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  timerpoll, dlgid, gsmband\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  timerpoll, dlgid, gsmband\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  debuglevel {none,gprs,range } \r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  debuglevel {none,gprs,range } \r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  apn, roaming {on|off}, port, ip, script, passwd\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  apn, roaming {on|off}, port, ip, script, passwd\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  defaults \r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  maxrange, C{0..2} chname\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  save\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  default\r\n\0");
+		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  save\r\n\0");
 	}
 
 	// HELP KILL
 	else if (!strcmp_P( strupr(argv[1]), PSTR("KILL\0"))) {
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-kill \r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "-kill \r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  {gprstx,gprsrx,range}\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  {gprstx,gprsrx,range}\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	} else {
 
 		// HELP GENERAL
 		memset( &cmd_printfBuff, '\0', sizeof(cmd_printfBuff));
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("\r\nSpymovil %s %s %s %s\r\n\0"), SP5K_MODELO, SP5K_VERSION, SP5K_REV, SP5K_DATE);
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "\r\nSpymovil %s %s %s %s\r\n\0", SP5K_MODELO, SP5K_VERSION, SP5K_REV, SP5K_DATE);
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("Available commands are:\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "Available commands are:\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-cls\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "-cls\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-status\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "-status\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-reset...\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "-reset...\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-config...\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "-config...\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-read...\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "-read...\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-write...\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "-write...\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("-kill...\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "-kill...\r\n\0");
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	}
 
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("\r\n\0"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff),"\r\n\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 }
@@ -210,7 +211,7 @@ static void cmdKillFunction(void)
 	if (!strcmp_P( strupr(argv[1]), PSTR("GPRSTX\0"))) {
 		vTaskSuspend( xHandle_tkGprs );
 		// Dejo la flag de modem prendido para poder leer comandos
-		GPRS_stateVars.modem_prendido = true;
+//		GPRS_stateVars.modem_prendido = true;
 		return;
 	}
 
@@ -238,175 +239,184 @@ uint16_t pos;
 StatBuffer_t pxFFStatBuffer;
 
 	memset( &cmd_printfBuff, '\0', sizeof(cmd_printfBuff));
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("\r\nSpymovil %s %s %s %s\r\n\0"), SP5K_MODELO, SP5K_VERSION,SP5K_REV, SP5K_DATE);
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "\r\nSpymovil %s %s %s %s\r\n\0", SP5K_MODELO, SP5K_VERSION,SP5K_REV, SP5K_DATE);
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	// Last reset info
-	pos = snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("Wdg (0x%X"),wdgStatus.resetCause);
+	pos = FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "Wdg (0x%X",wdgStatus.resetCause);
 	if (wdgStatus.resetCause & 0x01 ) {
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR(" PORF"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), " PORF");
 	}
 	if (wdgStatus.resetCause & 0x02 ) {
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR(" EXTRF"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), " EXTRF");
 	}
 	if (wdgStatus.resetCause & 0x04 ) {
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR(" BORF"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), " BORF");
 	}
 	if (wdgStatus.resetCause & 0x08 ) {
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR(" WDRF"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), " WDRF");
 	}
 	if (wdgStatus.resetCause & 0x10 ) {
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR(" JTRF"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), " JTRF");
 	}
-	pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR(" )\r\n\0"));
+	pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), " )\r\n\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* DlgId */
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("dlgid: %s\r\n\0"), systemVars.dlgId );
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "dlgid: %s\r\n\0", systemVars.dlgId );
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* Fecha y Hora */
 	RTC_read(&rtcDateTime);
-	pos = snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("rtc: %02d/%02d/%04d "),rtcDateTime.day,rtcDateTime.month, rtcDateTime.year );
-	pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("%02d:%02d:%02d\r\n\0"),rtcDateTime.hour,rtcDateTime.min, rtcDateTime.sec );
+	pos = FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "rtc: %02d/%02d/%04d ",rtcDateTime.day,rtcDateTime.month, rtcDateTime.year );
+	pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "%02d:%02d:%02d\r\n\0",rtcDateTime.hour,rtcDateTime.min, rtcDateTime.sec );
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* SERVER */
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR(">Server:\r\n\0"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), ">Server:\r\n\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* APN */
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  apn: %s\r\n\0"), systemVars.apn );
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  apn: %s\r\n\0", systemVars.apn );
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* SERVER IP:SERVER PORT */
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  server ip:port: %s:%s\r\n\0"), systemVars.server_ip_address,systemVars.server_tcp_port );
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  server ip:port: %s:%s\r\n\0", systemVars.server_ip_address,systemVars.server_tcp_port );
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* SERVER SCRIPT */
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  server script: %s\r\n\0"), systemVars.serverScript );
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  server script: %s\r\n\0", systemVars.serverScript );
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* SERVER PASSWD */
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  passwd: %s\r\n\0"), systemVars.passwd );
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  passwd: %s\r\n\0", systemVars.passwd );
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	// MODEM ---------------------------------------------------------------------------------------
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR(">Modem:\r\n\0"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), ">Modem:\r\n\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* Modem band */
-	pos = snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  band: "));
+	pos = FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  band: ");
 	switch ( systemVars.gsmBand) {
 	case 0:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("(900)"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "(900)");
 		break;
 	case 1:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("(1800)"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "(1800)");
 		break;
 	case 2:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("dual band (900/1800)"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "dual band (900/1800)");
 		break;
 	case 3:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("pcs (1900)"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "pcs (1900)");
 		break;
 	case 4:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("gsm (850)"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "gsm (850)");
 		break;
 	case 5:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("dual band (1900/850)"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "dual band (1900/850)");
 		break;
 	case 6:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("triband (900/1800/1900)"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "triband (900/1800/1900)");
 		break;
 	case 7:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("triband (850/1800/1900)"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "triband (850/1800/1900)");
 		break;
 	case 8:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("cuatriband (850/900/1800/1900)"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "cuatriband (850/900/1800/1900)");
 		break;
 	}
-	pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("\r\n\0"));
+	pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "\r\n\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* ROAMING */
 	if ( systemVars.roaming == true ) {
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  roaming ON\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  roaming ON\r\n\0");
 	} else {
-		snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  roaming OFF\r\n\0"));
+		FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  roaming OFF\r\n\0");
 	}
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* DLGIP */
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  dlg ip: %s\r\n\0"), systemVars.dlg_ip_address );
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  dlg ip: %s\r\n\0", systemVars.dlg_ip_address );
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* CSQ */
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  signalQ: csq=%d, dBm=%d\r\n\0"), systemVars.csq, systemVars.dbm );
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  signalQ: csq=%d, dBm=%d\r\n\0", systemVars.csq, systemVars.dbm );
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	// GPRS STATE
-	pos = snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  state: "));
+/*	pos = FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  state: ");
 	switch (GPRS_stateVars.state) {
 	case G_ESPERA_APAGADO:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("await_off\r\n"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "await_off\r\n");
 		break;
 	case G_PRENDER:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("prendiendo\r\n"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "prendiendo\r\n");
 		break;
 	case G_CONFIGURAR:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("configurando\r\n"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "configurando\r\n");
 		break;
 	case G_MON_SQE:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("mon_sqe\r\n"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "mon_sqe\r\n");
 		break;
 	case G_GET_IP:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("ip\r\n"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "ip\r\n");
 		break;
 	case G_INIT_FRAME:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("init frame\r\n"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "init frame\r\n");
 		break;
 	case G_DATA:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("data\r\n"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "data\r\n");
 		break;
 	default:
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("ERROR\r\n"));
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "ERROR\r\n");
 		break;
 	}
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-
+*/
 	// SYSTEM ---------------------------------------------------------------------------------------
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR(">System:\r\n\0"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), ">System:\r\n\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* Memoria */
 	FF_stat(&pxFFStatBuffer);
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  memory: wrPtr=%d,rdPtr=%d,delPtr=%d,Free=%d,4del=%d \r\n"), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del );
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-
-	/* Timers */
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  timerPoll: [%ds]\r\n\0"),systemVars.timerPoll );
-	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
-
-	/* DebugLevel */
-	pos = snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  debugLevel: "));
-	if ( systemVars.debugLevel == D_NONE) {
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("none") );
-	} else 	if ( systemVars.debugLevel == D_GPRS) {
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("gprs") );
-	} else 	if ( systemVars.debugLevel == D_RANGE) {
-		pos += snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("range") );
-	}
-	snprintf_P( &cmd_printfBuff[pos],sizeof(cmd_printfBuff),PSTR("\r\n\0"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  memory: wrPtr=%d,rdPtr=%d,delPtr=%d,Free=%d,4del=%d \r\n", pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del );
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
 	/* CONFIG */
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR(">Config:\r\n\0"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), ">Config:\r\n\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 
-	// Bateria
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("  batt{0-15V}\r\n\0"));
+	/* Timers */
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  timerPoll: [%ds]\r\n\0",systemVars.timerPoll );
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+
+	/* DebugLevel */
+	pos = FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  debugLevel: ");
+	if ( systemVars.debugLevel == D_NONE) {
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "none" );
+	} else 	if ( systemVars.debugLevel == D_GPRS) {
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "gprs" );
+	} else 	if ( systemVars.debugLevel == D_RANGE) {
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "range" );
+	}
+	FRTOS_snprintf( &cmd_printfBuff[pos],sizeof(cmd_printfBuff), "\r\n\0");
+	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+
+	// MaxRange
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  maxRange=%d\r\n\0",systemVars.maxRange);
+	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+
+	// Channel Names
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  Ch0(range): %s\r\n\0",systemVars.chName[0] );
+	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  Ch1(dig0):  %s\r\n\0",systemVars.chName[1] );
+	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "  Ch2(dig1):  %s\r\n\0",systemVars.chName[2] );
+	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
+
 
 }
 /*------------------------------------------------------------------------------------*/
@@ -426,7 +436,7 @@ uint8_t regValue;
 		retS = EE_test_read( argv[2], cmd_printfBuff, argv[3] );
 		if ( retS ) {
 			// El string leido lo devuelve en cmd_printfBuff por lo que le agrego el CR.
-			snprintf_P( &cmd_printfBuff[atoi(argv[3])], sizeof(cmd_printfBuff),PSTR( "\r\n\0"));
+			FRTOS_snprintf( &cmd_printfBuff[atoi(argv[3])], sizeof(cmd_printfBuff),  "\r\n\0");
 			FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 		}
 		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
@@ -436,9 +446,9 @@ uint8_t regValue;
 	// RTC
 	if (!strcmp_P( strupr(argv[1]), PSTR("RTC\0"))) {
 		if ( RTC_date_to_str( datetime, sizeof(datetime) ) != -1 ) {
-			snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("OK\r\n%s\r\n\0"), datetime );
+			FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "OK\r\n%s\r\n\0", datetime );
 		} else {
-			snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("ERROR\r\n\0"));
+			FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "ERROR\r\n\0");
 		}
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 		return;
@@ -457,9 +467,9 @@ uint8_t regValue;
 		}
 
 		if (retS ) {
-			snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("OK\r\n[reg 0X%03x]=[0X%03x]\r\n\0"),atoi(argv[3]),regValue);
+			FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "OK\r\n[reg 0X%03x]=[0X%03x]\r\n\0",atoi(argv[3]),regValue);
 		} else {
-			snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("ERROR\r\n\0"));
+			FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "ERROR\r\n\0");
 		}
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 		return;
@@ -474,13 +484,13 @@ uint8_t regValue;
 	// FRAME
 
 	// MEMORY
-	if (!strcmp_P( strupr(argv[1]), PSTR("MEMORY\0"))) {
+	if (!strcmp_P( strupr(argv[1]),  "MEMORY\0")) {
 		pv_readMemory();
 		return;
 	}
 
 	// CMD NOT FOUND
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("ERROR\r\nCMD NOT DEFINED\r\n"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "ERROR\r\nCMD NOT DEFINED\r\n");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	return;
 }
@@ -588,7 +598,7 @@ bool retS = false;
 	}
 
 	// CMD NOT FOUND
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("ERROR\r\nCMD NOT DEFINED\r\n"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "ERROR\r\nCMD NOT DEFINED\r\n");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	return;
 }
@@ -598,6 +608,31 @@ static void cmdConfigFunction(void)
 bool retS = false;
 
 	pv_makeArgv();
+
+	if (!strcmp_P( strupr(argv[1]), PSTR("MAXRANGE\0"))) {
+		retS = u_configMaxRange(argv[2]);
+		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
+		return;
+	}
+
+	// CANALES ANALOGICOS
+	if (!strcmp_P( strupr(argv[1]), PSTR("C0\0"))) {
+		retS = u_configChName( 0, argv[2] );
+		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
+		return;
+	}
+
+	if (!strcmp_P( strupr(argv[1]), PSTR("C1\0"))) {
+		retS = u_configChName( 1, argv[2] );
+		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
+		return;
+	}
+
+	if (!strcmp_P( strupr(argv[1]), PSTR("C2\0"))) {
+		retS = u_configChName( 2, argv[2] );
+		retS ? pv_snprintfP_OK() : 	pv_snprintfP_ERR();
+		return;
+	}
 
 	if (!strcmp_P( strupr(argv[1]), PSTR("SAVE\0"))) {
 		retS = u_saveSystemParams();
@@ -730,8 +765,16 @@ bool retS = false;
 		return;
 	}
 
+	// config default
+	if (!strcmp_P( strupr(argv[1]), PSTR("DEFAULT\0"))) {
+		u_loadDefaults();
+		pv_snprintfP_OK();
+		return;
+	}
+
+
 	// CMD NOT FOUND
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("ERROR\r\nCMD NOT DEFINED\r\n"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "ERROR\r\nCMD NOT DEFINED\r\n");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	return;
 }
@@ -783,13 +826,13 @@ int i = 0;
 /*------------------------------------------------------------------------------------*/
 static void pv_snprintfP_OK(void )
 {
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("OK\r\n\0"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "OK\r\n\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 }
 /*------------------------------------------------------------------------------------*/
 static void pv_snprintfP_ERR(void)
 {
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("ERROR\r\n\0"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "ERROR\r\n\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 }
 /*------------------------------------------------------------------------------------*/
@@ -820,13 +863,16 @@ uint16_t pos;
 
 		// imprimo
 		FF_stat(&pxFFStatBuffer);
-		pos = snprintf_P( cmd_printfBuff, sizeof(cmd_printfBuff), PSTR("RD:[%d/%d/%d][%d/%d] "), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
-		pos += snprintf_P( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ), PSTR("frame::{" ));
-		pos += snprintf_P( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ),PSTR( "%04d%02d%02d,"),Aframe.rtc.year,Aframe.rtc.month,Aframe.rtc.day );
-		pos += snprintf_P( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ), PSTR("%02d%02d%02d,"),Aframe.rtc.hour,Aframe.rtc.min, Aframe.rtc.sec );
+		pos = FRTOS_snprintf( cmd_printfBuff, sizeof(cmd_printfBuff),  "RD:[%d/%d/%d][%d/%d] ", pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ),  "frame::{" );
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ),  "%04d%02d%02d,",Aframe.rtc.year,Aframe.rtc.month,Aframe.rtc.day );
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ),  "%02d%02d%02d",Aframe.rtc.hour,Aframe.rtc.min, Aframe.rtc.sec );
 
 		// Datos
-		pos += snprintf_P( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ), PSTR(",H=%d"), Aframe.range );
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ),  ",%s=%d", systemVars.chName[0], Aframe.range );
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ),  ",%s=%d", systemVars.chName[1], Aframe.dig0 );
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ),  ",%s=%d", systemVars.chName[2], Aframe.dig1 );
+		pos += FRTOS_snprintf( &cmd_printfBuff[pos], ( sizeof(cmd_printfBuff) - pos ),  "}\r\n\0" );
 		FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	}
 }
@@ -848,7 +894,7 @@ static void pv_cmd_pulse(void)
 		return;
 	}
 
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("cmd ERROR: ( write pulse on{off} )\r\n\0"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "cmd ERROR: ( write pulse on{off} )\r\n\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	return;
 }
@@ -870,7 +916,7 @@ static void pv_cmd_testpin(void)
 		return;
 	}
 
-	snprintf_P( cmd_printfBuff,sizeof(cmd_printfBuff),PSTR("cmd ERROR: ( write testpin on{off} )\r\n\0"));
+	FRTOS_snprintf( cmd_printfBuff,sizeof(cmd_printfBuff), "cmd ERROR: ( write testpin on{off} )\r\n\0");
 	FreeRTOS_write( &pdUART1, cmd_printfBuff, sizeof(cmd_printfBuff) );
 	return;
 }

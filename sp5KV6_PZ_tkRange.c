@@ -25,7 +25,7 @@ void pv_rangeMeter_init(void);
 void pv_flush_stack_pulses(void);
 void pv_push_stack_pulses(uint16_t counter);
 int16_t pv_pulse_calcular_distancia(void);
-void pv_pulsos_stats(uint16_t *avg, float *var);
+void pv_pulsos_stats(uint16_t *avg, uint16_t *var);
 void pv_rangeMeter_ping(int16_t *range);
 void  pv_rangeMeter_process_frame(void);
 
@@ -46,7 +46,7 @@ frameData_t data_record;
 	while ( !startTask )
 		vTaskDelay( ( TickType_t)( 100 / portTICK_RATE_MS ) );
 
-	snprintf_P( range_printfBuff,sizeof(range_printfBuff),PSTR("starting tkRange..\r\n\0"));
+	FRTOS_snprintf( range_printfBuff,sizeof(range_printfBuff),"starting tkRange..\r\n\0");
 	FreeRTOS_write( &pdUART1, range_printfBuff, sizeof(range_printfBuff) );
 
 	pv_rangeMeter_init();
@@ -174,22 +174,20 @@ int16_t pv_pulse_calcular_distancia(void)
 {
 
 uint16_t avg;
-float var;
-float us;
+uint16_t var;
 uint16_t distancia;
 int16_t ping;
 
 	pv_pulsos_stats(&avg, &var);
-	us = USxTICK * avg;						// Convierto a us.
-	distancia = (uint16_t)( us / 58);		// Calculo la distancia ( 58us - 1cms )
-	if ( (distancia > 0) && (distancia < 600) ) {
+	distancia = (uint16_t)( USxTICK * avg / 58);		// Calculo la distancia ( 58us - 1cms )
+	if ( (distancia > 15) && (distancia < systemVars.maxRange) ) {
 		ping = distancia;
 	} else {
 		ping = -1;
 	}
 
 	if (systemVars.debugLevel ==  D_RANGE ) {
-		snprintf_P( range_printfBuff,sizeof(range_printfBuff),PSTR("pulse DEBUG: avg=%d, var=%.03f, us=%.1f, distancia=%d \r\n\0"),avg, var, us, distancia);
+		FRTOS_snprintf( range_printfBuff,sizeof(range_printfBuff),"pulse DEBUG: avg=%d, var=%d, distancia=%d \r\n\0",avg, var,distancia);
 		FreeRTOS_write( &pdUART1, range_printfBuff, sizeof(range_printfBuff) );
 	}
 
@@ -197,15 +195,15 @@ int16_t ping;
 
 }
 //------------------------------------------------------------------------------------
-void pv_pulsos_stats(uint16_t *avg, float *var)
+void pv_pulsos_stats(uint16_t *avg, uint16_t *var)
 {
 	// Calculo el promedio de los datos del stack si sin validos.
 
 uint8_t i, items;
-float prom, std;
+uint32_t prom, std;
 
-	prom = 0.0;
-	std = 0.0;
+	prom = 0;
+	std = 0;
 	items = 0;
 
 	for ( i = 0; i < MAX_PULSE_STACK; i++ ) {
@@ -216,7 +214,7 @@ float prom, std;
 		}
 
 		if (systemVars.debugLevel ==  D_RANGE ) {
-			snprintf_P( range_printfBuff,sizeof(range_printfBuff),PSTR("pulse DEBUG: [%02d][%02d] %.01f %.01f %.01f\r\n\0"), i,items,(float)s_pulse_stack.stack[i], prom, std );
+			FRTOS_snprintf( range_printfBuff,sizeof(range_printfBuff),"pulse DEBUG: [%02d][%02d] %d\r\n\0", i,items,s_pulse_stack.stack[i] );
 			FreeRTOS_write( &pdUART1, range_printfBuff, sizeof(range_printfBuff) );
 		}
 
@@ -227,7 +225,7 @@ float prom, std;
 	std = sqrt (std / items - ( prom * prom ));
 
 	*avg = (uint16_t) prom;
-	*var = std;
+	*var = (uint16_t) std;
 
 }
 //------------------------------------------------------------------------------------
@@ -241,28 +239,38 @@ uint16_t pos = 0;
 	// Agrego el timeStamp
 	RTC_read(&data_record.rtc);
 
+	// Canales digitales
+	data_record.dig0 = 0;
+	data_record.dig1 = 0;
+
     // Guardo en BD
 	bytes_written = FF_fwrite( &data_record, sizeof(data_record));
 	FF_stat(&pxFFStatBuffer);
 
 	if ( bytes_written != sizeof(data_record) ) {
 		// Error de escritura ??
-		pos = snprintf_P( range_printfBuff,sizeof(range_printfBuff),PSTR("%s BD: WR ERROR: (%d),\0"),u_now(),pxFFStatBuffer.errno);
+		pos = FRTOS_snprintf( range_printfBuff,sizeof(range_printfBuff),"%s BD: WR ERROR: (%d),\0",u_now(),pxFFStatBuffer.errno);
 	} else {
 		// Stats de memoria
-		pos = snprintf_P( range_printfBuff, sizeof(range_printfBuff), PSTR("%s MEM [%d/%d/%d][%d/%d],\0"),u_now(), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
+		pos = FRTOS_snprintf( range_printfBuff, sizeof(range_printfBuff), "%s MEM [%d/%d/%d][%d/%d],\0",u_now(), pxFFStatBuffer.HEAD,pxFFStatBuffer.RD, pxFFStatBuffer.TAIL,pxFFStatBuffer.rcdsFree,pxFFStatBuffer.rcds4del);
 	}
 
     // Imprimo
 	// HEADER
-	pos += snprintf_P( &range_printfBuff[pos], (sizeof(range_printfBuff) - pos ), PSTR(" frame {" ) );
+	pos += FRTOS_snprintf( &range_printfBuff[pos], (sizeof(range_printfBuff) - pos ), " frame {" );
 	// timeStamp.
-	pos += snprintf_P( &range_printfBuff[pos], ( sizeof(range_printfBuff) - pos ),PSTR( "%04d%02d%02d,"),data_record.rtc.year,data_record.rtc.month,data_record.rtc.day );
-	pos += snprintf_P( &range_printfBuff[pos], ( sizeof(range_printfBuff) - pos ), PSTR("%02d%02d%02d"),data_record.rtc.hour,data_record.rtc.min, data_record.rtc.sec );
-	// Range.
-	pos += snprintf_P( &range_printfBuff[pos], ( sizeof(range_printfBuff) - pos ), PSTR(",H=%d"), data_record.range );
+	pos += FRTOS_snprintf( &range_printfBuff[pos], ( sizeof(range_printfBuff) - pos ),"%04d%02d%02d,",data_record.rtc.year,data_record.rtc.month,data_record.rtc.day );
+	pos += FRTOS_snprintf( &range_printfBuff[pos], ( sizeof(range_printfBuff) - pos ), "%02d%02d%02d",data_record.rtc.hour,data_record.rtc.min, data_record.rtc.sec );
+
+	// C0 ( Range )
+	pos += FRTOS_snprintf( &range_printfBuff[pos], ( sizeof(range_printfBuff) - pos ), ",%s=%d", systemVars.chName[0], data_record.range );
+	// C1
+	pos += FRTOS_snprintf( &range_printfBuff[pos], ( sizeof(range_printfBuff) - pos ), ",%s=%d", systemVars.chName[1], data_record.dig0 );
+	// C2
+	pos += FRTOS_snprintf( &range_printfBuff[pos], ( sizeof(range_printfBuff) - pos ), ",%s=%d", systemVars.chName[2], data_record.dig1 );
+
 	// TAIL
-	pos += snprintf_P( &range_printfBuff[pos], ( sizeof(range_printfBuff) - pos ), PSTR("}\r\n\0") );
+	pos += FRTOS_snprintf( &range_printfBuff[pos], ( sizeof(range_printfBuff) - pos ), "}\r\n\0" );
 	FreeRTOS_write( &pdUART1, range_printfBuff, sizeof(range_printfBuff) );
 
     // Aviso que trasmita

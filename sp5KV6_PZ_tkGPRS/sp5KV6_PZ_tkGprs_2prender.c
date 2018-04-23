@@ -30,7 +30,7 @@ bool exit_flag = bool_RESTART;
 	GPRS_stateVars.modem_prendido = true;
 	g_sleep(3);
 
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::prender:\r\n\0"), u_now());
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::prender:\r\n\0", u_now());
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	// Me aseguro que el modem este apagado
@@ -51,7 +51,7 @@ bool exit_flag = bool_RESTART;
 
 
 			if ( systemVars.debugLevel == D_GPRS ) {
-				snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::prender: HW=%d,SW=%d\r\n\0"), u_now(), hw_tries, sw_tries);
+				FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::prender: HW=%d,SW=%d\r\n\0", u_now(), hw_tries, sw_tries);
 				FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 			}
 
@@ -79,7 +79,7 @@ bool exit_flag = bool_RESTART;
 			if ( strstr( gprsRx.buffer, "OK") != NULL ) {
 
 				if ( systemVars.debugLevel == D_GPRS ) {
-					snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::prender: Modem prendido\r\n\0"), u_now());
+					FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::prender: Modem prendido\r\n\0", u_now());
 					FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 				}
 
@@ -90,7 +90,7 @@ bool exit_flag = bool_RESTART;
 			} else {
 
 				if ( systemVars.debugLevel == D_GPRS ) {
-					snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::prender: Modem No prendio !!\r\n\0"), u_now());
+					FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::prender: Modem No prendio !!\r\n\0", u_now());
 					FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 				}
 			}
@@ -114,7 +114,7 @@ bool exit_flag = bool_RESTART;
 
 	// Si salgo por aqui es que el modem no prendio luego de todos los reintentos
 	exit_flag = bool_RESTART;
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::prender: FAIL!! Modem No prendio en HW%d y SW%d intentos\r\n\0"), u_now(), MAX_HW_TRIES_PWRON, MAX_SW_TRIES_PWRON);
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::prender: FAIL!! Modem No prendio en HW%d y SW%d intentos\r\n\0", u_now(), MAX_HW_TRIES_PWRON, MAX_SW_TRIES_PWRON);
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	// Exit:
@@ -138,8 +138,6 @@ static bool pv_procesar_signals_prender( bool *exit_flag )
 
 bool ret_f = false;
 
-EXIT:
-
 	GPRS_stateVars.signal_redial = false;
 	GPRS_stateVars.signal_frameReady = false;
 
@@ -152,7 +150,6 @@ static void pv_readImei(void)
 	// llevar un control de donde esta c/sim
 
 uint8_t i,j,start, end;
-
 
 	FreeRTOS_ioctl( &pdUART0,ioctl_UART_CLEAR_RX_BUFFER, NULL, false);
 	FreeRTOS_ioctl( &pdUART0,ioctl_UART_CLEAR_TX_BUFFER, NULL, false);
@@ -197,7 +194,7 @@ uint8_t i,j,start, end;
 // Exit
 EXIT:
 
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::prender: IMEI[%s]\r\n\0"), u_now(), buff_gprs_imei);
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::prender: IMEI[%s]\r\n\0", u_now(), buff_gprs_imei);
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 }

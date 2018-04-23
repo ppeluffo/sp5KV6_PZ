@@ -29,7 +29,7 @@ bool exit_flag = false;
 	//u_uarts_ctl(0);
 
 	// Secuencia para apagar el modem y dejarlo en modo low power.
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::wait: Apago modem\r\n\0"), u_now());
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::wait: Apago modem\r\n\0", u_now());
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	GPRS_stateVars.modem_prendido = false;

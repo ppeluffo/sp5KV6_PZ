@@ -35,7 +35,7 @@ void g_printRxBuffer(void)
 	// Utiliza el buffer de RX.
 
 	if ( systemVars.debugLevel == D_GPRS ) {
-		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::rxbuff: \r\n\0"), u_now() );
+		FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::rxbuff: \r\n\0", u_now() );
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 		// Imprimo todo el buffer de RX ( 640b). Sale por \0.
@@ -64,7 +64,7 @@ uint8_t tries;
 bool exit_flag = false;
 
 	if ( systemVars.debugLevel == D_GPRS ) {
-		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::sock: opening\r\n\0"), u_now() );
+		FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::sock: opening\r\n\0", u_now() );
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 	}
 
@@ -72,7 +72,7 @@ bool exit_flag = false;
 	FreeRTOS_ioctl( &pdUART0,ioctl_UART_CLEAR_TX_BUFFER, NULL, false);
 	g_flushRXBuffer();
 
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("AT*E2IPO=1,\"%s\",%s\r\n\0"),systemVars.server_ip_address,systemVars.server_tcp_port);
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"AT*E2IPO=1,\"%s\",%s\r\n\0",systemVars.server_ip_address,systemVars.server_tcp_port);
 	FreeRTOS_write( &pdUART0, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	// Espero hasta 10s que abra
@@ -105,7 +105,7 @@ bool exit_flag = false;
 	if ( ( GPRS_stateVars.modem_prendido == true ) && (pin_dcd == 0 ) ){
 
 		if ( systemVars.debugLevel == D_GPRS ) {
-			snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::sock: OPEN\r\n\0"), u_now() );
+			FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::sock: OPEN\r\n\0", u_now() );
 			FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 		}
 		exit_flag = true;
@@ -113,7 +113,7 @@ bool exit_flag = false;
 	} else {
 
 		if ( systemVars.debugLevel == D_GPRS ) {
-			snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::sock: CLOSED\r\n\0"), u_now() );
+			FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::sock: CLOSED\r\n\0", u_now() );
 			FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 		}
 
@@ -131,7 +131,7 @@ void g_print_debug_gprs_header(const char *msg)
 
 char printfBuff[CHAR64];
 
-	snprintf_P( printfBuff,sizeof(printfBuff),PSTR("%s %s"), u_now(), msg );
+	FRTOS_snprintf( printfBuff,sizeof(printfBuff),"%s %s", u_now(), msg );
 	FreeRTOS_write( &pdUART1, printfBuff, sizeof(printfBuff) );
 
 }

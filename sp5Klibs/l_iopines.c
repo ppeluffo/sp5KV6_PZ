@@ -40,32 +40,6 @@ uint8_t IO_read_UPULSE_WIDTH(void)
 	return( ( UPULSE_WIDTH_PIN & _BV(2) ) >> 2 );
 }
 //------------------------------------------------------------------------------------
-void IO_init_pines(void)
-{
-	// Configuracion de pines:
-
-	// El pin de control de la terminal es entrada
-	cbi(TERMSW_DDR, TERMSW_BIT);
-
-	// El pin de DCD es entrada
-	//cbi(DCD_DDR, DCD_BIT);
-
-	// Leds
-	//sbi(LED_KA_DDR, LED_KA_BIT);		// El pin del led de KA ( PD6 ) es una salida.
-	//sbi(LED_MODEM_DDR, LED_MODEM_BIT);
-	// inicialmente los led quedan en 0
-	//sbi(LED_KA_PORT, LED_KA_BIT);
-	//sbi(LED_MODEM_PORT, LED_MODEM_BIT);
-
-	IO_config_TEST_PIN();
-	IO_clear_TEST_PIN(); // Inicialmente en 0
-
-	// RANGE
-	IO_config_UPULSE_RUN();
-	IO_config_UPULSE_WIDTH();
-
-}
-//------------------------------------------------------------------------------------
 bool IO_read_dcd( uint8_t *pin)
 {
 	// MCP23008 logic

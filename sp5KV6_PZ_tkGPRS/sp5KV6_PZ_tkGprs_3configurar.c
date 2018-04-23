@@ -27,7 +27,7 @@ bool exit_flag = bool_RESTART;
 
 	GPRS_stateVars.state = G_CONFIGURAR;
 
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::config:\r\n\0"), u_now() );
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::config:\r\n\0", u_now() );
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 // Loop:
@@ -103,7 +103,7 @@ static void pv_gprs_configurar_parametros(void)
 	vTaskDelay( (portTickType)( 100 / portTICK_RATE_MS ) );
 	g_printRxBuffer();
 
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::config: Modem Configurado\r\n\0"), u_now() );
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::config: Modem Configurado\r\n\0", u_now() );
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 }
@@ -133,14 +133,14 @@ uint8_t modemBand;
 	ts++;
 	modemBand = atoi(ts);
 
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::config: mBAND=%d,sBAND=%d\r\n\0"),u_now(), modemBand, systemVars.gsmBand);
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::config: mBAND=%d,sBAND=%d\r\n\0",u_now(), modemBand, systemVars.gsmBand);
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	// Analizo
 	if ( modemBand != systemVars.gsmBand ) {
 
 		// Reconfiguro.
-		snprintf_P( gprs_printfBuff,CHAR256,PSTR("AT*EBSE=%d\r\0"),systemVars.gsmBand );
+		FRTOS_snprintf( gprs_printfBuff,CHAR256,"AT*EBSE=%d\r\0",systemVars.gsmBand );
 		FreeRTOS_ioctl( &pdUART0,ioctl_UART_CLEAR_RX_BUFFER, NULL, false);
 		g_flushRXBuffer();
 		FreeRTOS_write( &pdUART0, gprs_printfBuff, sizeof(gprs_printfBuff));
@@ -152,14 +152,14 @@ uint8_t modemBand;
 		FreeRTOS_write( &pdUART0, "AT&W\r\0", sizeof("AT&W\r\0") );
 		vTaskDelay( (portTickType)( 100 / portTICK_RATE_MS ) );
 
-		snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::config: Reconfiguro GSM_BAND a modo %d:\r\n\0"), u_now(),systemVars.gsmBand);
+		FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::config: Reconfiguro GSM_BAND a modo %d:\r\n\0", u_now(),systemVars.gsmBand);
 		FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 		// Debo reiniciar el modem para que tome la nueva banda
 		return(false);
 	}
 
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::config: Banda GRPS OK.\r\n\0"), u_now() );
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::config: Banda GRPS OK.\r\n\0", u_now() );
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	return(true);
@@ -175,7 +175,7 @@ uint8_t reintentos = MAX_TRYES_NET_ATTCH;
 uint8_t check_tryes;
 bool exit_flag = false;
 
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::config: NET ATTACH.\r\n\0"), u_now() );
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::config: NET ATTACH.\r\n\0", u_now() );
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 	while ( reintentos-- > 0 ) {
@@ -196,7 +196,7 @@ bool exit_flag = false;
 			if ( strstr( gprsRx.buffer, "+CREG: 0,1") != NULL ) {
 				g_printRxBuffer();
 				// LOG & DEBUG
-				snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::config: NET OK.\r\n\0"), u_now() );
+				FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::config: NET OK.\r\n\0", u_now() );
 				FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 				exit_flag = true;
 				goto EXIT;
@@ -206,10 +206,11 @@ bool exit_flag = false;
 			if ( strstr( gprsRx.buffer, "+CREG: 0,5") != NULL ) {
 				g_printRxBuffer();
 				// LOG & DEBUG
-				snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::config: NET OK(roaming).\r\n\0"), u_now() );
+				FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::config: NET OK(roaming).\r\n\0", u_now() );
 				FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 				exit_flag = true;
-				goto EXIT;			}
+				goto EXIT;
+			}
 
 			g_sleep(2);	// Espero 2s mas por la respuesta
 		}
@@ -218,7 +219,7 @@ bool exit_flag = false;
 	}
 
 	// Luego de varios reintentos no pude conectarme a la red.
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::config: NET FAIL !!.\r\n\0"), u_now() );
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::config: NET FAIL !!.\r\n\0", u_now() );
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 	exit_flag = false;
 
@@ -253,7 +254,7 @@ char *ts = NULL;
 	}
 
 	// LOG & DEBUG
-	snprintf_P( gprs_printfBuff,sizeof(gprs_printfBuff),PSTR("%s GPRS::config: signalQ CSQ=%d,DBM=%d\r\n\0"), u_now(),systemVars.csq,systemVars.dbm );
+	FRTOS_snprintf( gprs_printfBuff,sizeof(gprs_printfBuff),"%s GPRS::config: signalQ CSQ=%d,DBM=%d\r\n\0", u_now(),systemVars.csq,systemVars.dbm );
 	FreeRTOS_write( &pdUART1, gprs_printfBuff, sizeof(gprs_printfBuff) );
 
 }

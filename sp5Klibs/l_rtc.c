@@ -15,6 +15,7 @@
 // --------------------------------------------------------------------------------
 
 #include "l_rtc.h"
+#include "FRTOS_stdio.h"
 
 static char pv_bcd2dec(char num);
 static char pv_dec2bcd(char num);
@@ -113,7 +114,7 @@ RtcTimeType_t rtcDateTime;
 int8_t pos = -1;
 
 	if ( RTC_read(&rtcDateTime) ) {
-		pos = snprintf( str, size ,"%02d/%02d/%04d %02d:%02d:%02d\r\n\0",rtcDateTime.day,rtcDateTime.month, rtcDateTime.year, rtcDateTime.hour,rtcDateTime.min, rtcDateTime.sec );
+		pos = FRTOS_snprintf( str, size ,"%02d/%02d/%04d %02d:%02d:%02d\r\n\0",rtcDateTime.day,rtcDateTime.month, rtcDateTime.year, rtcDateTime.hour,rtcDateTime.min, rtcDateTime.sec );
 	}
 	return(pos);
 
